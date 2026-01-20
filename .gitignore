@@ -36,6 +36,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# database
+/data
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Cloud code chat history
+2026-01-20-local-command-caveatcaveat-the-messages-below-w.txt
