@@ -101,6 +101,16 @@ export async function getSnippetById(
 
   // Check if expired
   if (snippet.expires_at && snippet.expires_at < Date.now()) {
+    // Delete R2 file if it's a file snippet
+    if (snippet.type === 'file' && snippet.r2_key) {
+      try {
+        const { getR2Bucket } = await import('@/lib/d1');
+        const r2 = await getR2Bucket();
+        await r2.delete(snippet.r2_key);
+      } catch (e) {
+        console.error(`Failed to delete R2 key ${snippet.r2_key}:`, e);
+      }
+    }
     await markAsDeleted(db, id);
     return null;
   }
