@@ -3,6 +3,7 @@
 import { useState, useEffect, ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface AdminShellProps {
   children: ReactNode;
@@ -65,8 +66,8 @@ export default function AdminShell({ children }: AdminShellProps) {
   // Loading
   if (authenticated === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-lg">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-slate-900 dark:text-white text-lg">Loading...</div>
       </div>
     );
   }
@@ -74,34 +75,37 @@ export default function AdminShell({ children }: AdminShellProps) {
   // Login form
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
+            <div className="absolute top-4 right-4">
+              <ThemeToggle />
+            </div>
             <Link href="/" className="inline-block">
               <h1 className="text-3xl font-bold">
-                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
                   snipit.sh
                 </span>
               </h1>
             </Link>
-            <p className="text-slate-400 mt-2">Admin Panel</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">Admin Panel</p>
           </div>
 
-          <form onSubmit={handleLogin} className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 space-y-4">
+          <form onSubmit={handleLogin} className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-6 space-y-4 shadow-sm dark:shadow-none">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Password</label>
+              <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Enter admin password"
                 autoFocus
               />
             </div>
 
             {error && (
-              <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm">
+              <div className="p-3 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300 text-sm">
                 {error}
               </div>
             )}
@@ -121,28 +125,36 @@ export default function AdminShell({ children }: AdminShellProps) {
 
   // Admin shell with sidebar
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
       {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-slate-800/80 border-b border-slate-700">
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white text-2xl">☰</button>
-        <Link href="/" className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-bold text-lg">
+      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-slate-900 dark:text-white text-2xl">☰</button>
+        <Link href="/" className="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent font-bold text-lg">
           snipit.sh Admin
         </Link>
-        <button onClick={handleLogout} className="text-slate-400 hover:text-white text-sm">Logout</button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button onClick={handleLogout} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm">Logout</button>
+        </div>
       </div>
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`${sidebarOpen ? 'block' : 'hidden'} lg:block fixed lg:sticky top-0 left-0 z-40 w-64 h-screen bg-slate-800/90 lg:bg-slate-800/50 border-r border-slate-700 flex-shrink-0`}>
+        <aside className={`${sidebarOpen ? 'block' : 'hidden'} lg:block fixed lg:sticky top-0 left-0 z-40 w-64 h-screen bg-white/90 dark:bg-slate-800/90 lg:bg-white/50 lg:dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700 flex-shrink-0`}>
           <div className="p-6">
-            <Link href="/" className="block mb-8">
-              <h1 className="text-xl font-bold">
-                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  snipit.sh
-                </span>
-              </h1>
-              <p className="text-slate-500 text-sm">Admin Panel</p>
-            </Link>
+            <div className="flex items-center justify-between mb-8">
+              <Link href="/" className="block">
+                <h1 className="text-xl font-bold">
+                  <span className="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                    snipit.sh
+                  </span>
+                </h1>
+                <p className="text-slate-500 dark:text-slate-500 text-sm">Admin Panel</p>
+              </Link>
+              <div className="hidden lg:block">
+                <ThemeToggle />
+              </div>
+            </div>
 
             <nav className="space-y-1">
               {NAV_ITEMS.map(item => {
@@ -154,8 +166,8 @@ export default function AdminShell({ children }: AdminShellProps) {
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm ${
                       isActive
-                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                        ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50'
                     }`}
                   >
                     <span>{item.icon}</span>
@@ -165,17 +177,17 @@ export default function AdminShell({ children }: AdminShellProps) {
               })}
             </nav>
 
-            <div className="mt-8 pt-8 border-t border-slate-700">
+            <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-300 transition text-sm w-full rounded-lg hover:bg-slate-700/50"
+                className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-300 transition text-sm w-full rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50"
               >
                 <span>🚪</span>
                 <span>Logout</span>
               </button>
               <Link
                 href="/"
-                className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition text-sm rounded-lg hover:bg-slate-700/50 mt-1"
+                className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-sm rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 mt-1"
               >
                 <span>🏠</span>
                 <span>Back to Site</span>

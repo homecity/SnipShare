@@ -43,122 +43,77 @@ export default function AdminDashboard() {
   return (
     <AdminShell>
       <div className="max-w-6xl">
-        <h2 className="text-2xl font-bold text-white mb-6">Dashboard</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Dashboard</h2>
 
         {loading ? (
-          <div className="text-slate-400">Loading statistics...</div>
+          <div className="text-slate-500 dark:text-slate-400">Loading statistics...</div>
         ) : stats ? (
           <>
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <StatCard
-                title="Total Snippets"
-                value={stats.totalSnippets}
-                icon="📋"
-                color="purple"
-              />
-              <StatCard
-                title="Active Snippets"
-                value={stats.activeSnippets}
-                icon="✅"
-                color="green"
-              />
-              <StatCard
-                title="Created Today"
-                value={stats.todaySnippets}
-                icon="📅"
-                color="blue"
-              />
-              <StatCard
-                title="Rate Limit Events (24h)"
-                value={stats.rateLimitEntries}
-                icon="🚦"
-                color="yellow"
-              />
+              <StatCard title="Total Snippets" value={stats.totalSnippets} icon="📋" color="purple" />
+              <StatCard title="Active Snippets" value={stats.activeSnippets} icon="✅" color="green" />
+              <StatCard title="Created Today" value={stats.todaySnippets} icon="📅" color="blue" />
+              <StatCard title="Rate Limit Events (24h)" value={stats.rateLimitEntries} icon="🚦" color="yellow" />
             </div>
 
             {/* Secondary Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <StatCard
-                title="Text Snippets"
-                value={stats.textSnippets}
-                icon="📝"
-                color="blue"
-              />
-              <StatCard
-                title="File Uploads"
-                value={stats.fileSnippets}
-                icon="📁"
-                color="green"
-              />
-              <StatCard
-                title="Encrypted"
-                value={stats.encryptedSnippets}
-                icon="🔒"
-                color="purple"
-              />
-              <StatCard
-                title="Burn After Read"
-                value={stats.burnSnippets}
-                icon="🔥"
-                color="orange"
-              />
+              <StatCard title="Text Snippets" value={stats.textSnippets} icon="📝" color="blue" />
+              <StatCard title="File Uploads" value={stats.fileSnippets} icon="📁" color="green" />
+              <StatCard title="Encrypted" value={stats.encryptedSnippets} icon="🔒" color="purple" />
+              <StatCard title="Burn After Read" value={stats.burnSnippets} icon="🔥" color="orange" />
             </div>
 
             {/* Tertiary Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              <StatCard
-                title="Deleted Snippets"
-                value={stats.deletedSnippets}
-                icon="🗑️"
-                color="red"
-              />
-              <div className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30 rounded-xl p-5">
+              <StatCard title="Deleted Snippets" value={stats.deletedSnippets} icon="🗑️" color="red" />
+              <div className="bg-cyan-50 dark:bg-gradient-to-br dark:from-cyan-500/20 dark:to-cyan-600/10 border border-cyan-200 dark:border-cyan-500/30 rounded-xl p-5 shadow-sm dark:shadow-none">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-2xl">💾</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">
+                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
                   {stats.totalFileSize < 1024 * 1024
                     ? `${(stats.totalFileSize / 1024).toFixed(1)} KB`
                     : `${(stats.totalFileSize / (1024 * 1024)).toFixed(2)} MB`}
                 </div>
-                <div className="text-sm text-slate-400">Total File Storage</div>
+                <div className="text-sm text-slate-500 dark:text-slate-400">Total File Storage</div>
               </div>
             </div>
 
             {/* Quick Info */}
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Service Info</h3>
+            <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm dark:shadow-none">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Service Info</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div className="flex justify-between py-2 border-b border-slate-700/50">
-                  <span className="text-slate-400">Database</span>
-                  <span className="text-white">Cloudflare D1 (SQLite)</span>
+                <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Database</span>
+                  <span className="text-slate-900 dark:text-white">Cloudflare D1 (SQLite)</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-700/50">
-                  <span className="text-slate-400">Runtime</span>
-                  <span className="text-white">Cloudflare Workers</span>
+                <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Runtime</span>
+                  <span className="text-slate-900 dark:text-white">Cloudflare Workers</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-700/50">
-                  <span className="text-slate-400">Max Content Size</span>
-                  <span className="text-white">500 KB</span>
+                <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Max Content Size</span>
+                  <span className="text-slate-900 dark:text-white">500 KB</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-700/50">
-                  <span className="text-slate-400">Max Expiration</span>
-                  <span className="text-white">2 Weeks</span>
+                <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Max Expiration</span>
+                  <span className="text-slate-900 dark:text-white">2 Weeks</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-700/50">
-                  <span className="text-slate-400">Rate Limit</span>
-                  <span className="text-white">10 creates / min / IP</span>
+                <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Rate Limit</span>
+                  <span className="text-slate-900 dark:text-white">10 creates / min / IP</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-700/50">
-                  <span className="text-slate-400">Snippet Retention</span>
-                  <span className="text-white">{stats.activeSnippets} active / {stats.totalSnippets} total</span>
+                <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Snippet Retention</span>
+                  <span className="text-slate-900 dark:text-white">{stats.activeSnippets} active / {stats.totalSnippets} total</span>
                 </div>
               </div>
             </div>
           </>
         ) : (
-          <div className="text-red-400">Failed to load statistics</div>
+          <div className="text-red-500 dark:text-red-400">Failed to load statistics</div>
         )}
       </div>
     </AdminShell>
@@ -177,21 +132,21 @@ function StatCard({
   color: string;
 }) {
   const colorMap: Record<string, string> = {
-    purple: 'from-purple-500/20 to-purple-600/10 border-purple-500/30',
-    green: 'from-green-500/20 to-green-600/10 border-green-500/30',
-    blue: 'from-blue-500/20 to-blue-600/10 border-blue-500/30',
-    yellow: 'from-yellow-500/20 to-yellow-600/10 border-yellow-500/30',
-    red: 'from-red-500/20 to-red-600/10 border-red-500/30',
-    orange: 'from-orange-500/20 to-orange-600/10 border-orange-500/30',
+    purple: 'bg-purple-50 dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-purple-600/10 border-purple-200 dark:border-purple-500/30',
+    green: 'bg-green-50 dark:bg-gradient-to-br dark:from-green-500/20 dark:to-green-600/10 border-green-200 dark:border-green-500/30',
+    blue: 'bg-blue-50 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-blue-600/10 border-blue-200 dark:border-blue-500/30',
+    yellow: 'bg-yellow-50 dark:bg-gradient-to-br dark:from-yellow-500/20 dark:to-yellow-600/10 border-yellow-200 dark:border-yellow-500/30',
+    red: 'bg-red-50 dark:bg-gradient-to-br dark:from-red-500/20 dark:to-red-600/10 border-red-200 dark:border-red-500/30',
+    orange: 'bg-orange-50 dark:bg-gradient-to-br dark:from-orange-500/20 dark:to-orange-600/10 border-orange-200 dark:border-orange-500/30',
   };
 
   return (
-    <div className={`bg-gradient-to-br ${colorMap[color] || colorMap.purple} border rounded-xl p-5`}>
+    <div className={`${colorMap[color] || colorMap.purple} border rounded-xl p-5 shadow-sm dark:shadow-none`}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-2xl">{icon}</span>
       </div>
-      <div className="text-3xl font-bold text-white mb-1">{value.toLocaleString()}</div>
-      <div className="text-sm text-slate-400">{title}</div>
+      <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{value.toLocaleString()}</div>
+      <div className="text-sm text-slate-500 dark:text-slate-400">{title}</div>
     </div>
   );
 }

@@ -9,11 +9,11 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 flex items-center justify-center">
       <div className="text-center">
         <div className="text-6xl mb-4">⚠️</div>
-        <h1 className="text-2xl text-white mb-2">Something went wrong</h1>
-        <p className="text-slate-400 mb-6">
+        <h1 className="text-2xl text-slate-900 dark:text-white mb-2">Something went wrong</h1>
+        <p className="text-slate-500 dark:text-slate-400 mb-6">
           An unexpected error occurred. Please try again.
         </p>
         <div className="flex gap-4 justify-center">
@@ -25,7 +25,7 @@ export default function Error({
           </button>
           <Link
             href="/"
-            className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+            className="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg transition"
           >
             Go Home
           </Link>

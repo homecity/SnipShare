@@ -29,16 +29,16 @@ export default function QRCodeModal({ url, show, onClose }: QRCodeModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-slate-800 p-6 rounded-xl"
+        className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-white text-lg font-semibold mb-4 text-center">
+        <h3 className="text-slate-900 dark:text-white text-lg font-semibold mb-4 text-center">
           Scan to Share
         </h3>
         <div className="bg-white p-4 rounded-lg" ref={canvasRef}>
           <QRCodeCanvas value={url} size={200} />
         </div>
-        <p className="text-slate-400 text-sm mt-4 text-center max-w-xs break-all">
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-4 text-center max-w-xs break-all">
           {url}
         </p>
         <div className="flex gap-2 mt-4">
@@ -50,7 +50,7 @@ export default function QRCodeModal({ url, show, onClose }: QRCodeModalProps) {
           </button>
           <button
             onClick={onClose}
-            className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm transition"
+            className="flex-1 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg text-sm transition"
           >
             Close
           </button>

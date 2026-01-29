@@ -110,10 +110,10 @@ export default function AdminSettings() {
   };
 
   const inputClass = (key: keyof AppSettings) =>
-    `w-full px-4 py-2.5 bg-slate-900/50 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${
+    `w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${
       isChanged(key)
         ? 'border-purple-400 ring-1 ring-purple-400/30'
-        : 'border-slate-600'
+        : 'border-slate-300 dark:border-slate-600'
     }`;
 
   const STATIC_CONFIG = [
@@ -138,31 +138,31 @@ export default function AdminSettings() {
     <AdminShell>
       <div className="max-w-4xl space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Settings</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Settings</h2>
           {hasChanges && (
-            <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs animate-pulse">
+            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 rounded-full text-xs animate-pulse">
               Unsaved changes
             </span>
           )}
         </div>
 
         {loading ? (
-          <div className="text-slate-400">Loading settings...</div>
+          <div className="text-slate-500 dark:text-slate-400">Loading settings...</div>
         ) : editedSettings ? (
           <>
             {/* Rate Limiting Settings */}
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-2">🚦 Rate Limiting</h3>
-              <p className="text-slate-400 text-sm mb-5">
+            <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm dark:shadow-none">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">🚦 Rate Limiting</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                 Control how many requests each IP can make. Changes apply immediately.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">
+                  <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">
                     Per Minute
                     {isChanged('rate_limit_per_minute') && (
-                      <span className="ml-2 text-purple-400 text-xs">modified</span>
+                      <span className="ml-2 text-purple-600 dark:text-purple-400 text-xs">modified</span>
                     )}
                   </label>
                   <input
@@ -173,14 +173,14 @@ export default function AdminSettings() {
                     onChange={e => updateField('rate_limit_per_minute', parseInt(e.target.value, 10) || 1)}
                     className={inputClass('rate_limit_per_minute')}
                   />
-                  <p className="text-slate-500 text-xs mt-1">Snippet creation per minute per IP</p>
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">Snippet creation per minute per IP</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">
+                  <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">
                     Per Hour
                     {isChanged('rate_limit_per_hour') && (
-                      <span className="ml-2 text-purple-400 text-xs">modified</span>
+                      <span className="ml-2 text-purple-600 dark:text-purple-400 text-xs">modified</span>
                     )}
                   </label>
                   <input
@@ -191,14 +191,14 @@ export default function AdminSettings() {
                     onChange={e => updateField('rate_limit_per_hour', parseInt(e.target.value, 10) || 1)}
                     className={inputClass('rate_limit_per_hour')}
                   />
-                  <p className="text-slate-500 text-xs mt-1">All creates + uploads per hour per IP</p>
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">All creates + uploads per hour per IP</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">
+                  <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">
                     Per Day
                     {isChanged('rate_limit_per_day') && (
-                      <span className="ml-2 text-purple-400 text-xs">modified</span>
+                      <span className="ml-2 text-purple-600 dark:text-purple-400 text-xs">modified</span>
                     )}
                   </label>
                   <input
@@ -209,24 +209,24 @@ export default function AdminSettings() {
                     onChange={e => updateField('rate_limit_per_day', parseInt(e.target.value, 10) || 1)}
                     className={inputClass('rate_limit_per_day')}
                   />
-                  <p className="text-slate-500 text-xs mt-1">Daily total limit per IP</p>
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">Daily total limit per IP</p>
                 </div>
               </div>
             </div>
 
             {/* File Upload Settings */}
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-2">📁 File Upload</h3>
-              <p className="text-slate-400 text-sm mb-5">
+            <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm dark:shadow-none">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">📁 File Upload</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                 Configure file upload limits and allowed types.
               </p>
 
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">
+                  <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">
                     Max File Size (MB)
                     {isChanged('max_file_size_mb') && (
-                      <span className="ml-2 text-purple-400 text-xs">modified</span>
+                      <span className="ml-2 text-purple-600 dark:text-purple-400 text-xs">modified</span>
                     )}
                   </label>
                   <input
@@ -237,16 +237,16 @@ export default function AdminSettings() {
                     onChange={e => updateField('max_file_size_mb', parseInt(e.target.value, 10) || 1)}
                     className={inputClass('max_file_size_mb') + ' max-w-[200px]'}
                   />
-                  <p className="text-slate-500 text-xs mt-1">
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
                     Maximum upload size in megabytes (Cloudflare Workers limit: 100MB)
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">
+                  <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">
                     Allowed File Extensions
                     {isChanged('allowed_file_types') && (
-                      <span className="ml-2 text-purple-400 text-xs">modified</span>
+                      <span className="ml-2 text-purple-600 dark:text-purple-400 text-xs">modified</span>
                     )}
                   </label>
                   <textarea
@@ -255,7 +255,7 @@ export default function AdminSettings() {
                     className={inputClass('allowed_file_types') + ' h-24 font-mono text-sm resize-y'}
                     placeholder=".txt,.md,.pdf,.json,..."
                   />
-                  <p className="text-slate-500 text-xs mt-1">
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
                     Comma-separated list of extensions (each must start with a dot)
                   </p>
 
@@ -270,8 +270,8 @@ export default function AdminSettings() {
                           key={ext}
                           className={`px-2 py-0.5 rounded text-xs ${
                             ext.startsWith('.') && ext.length >= 2
-                              ? 'bg-slate-700/50 text-slate-300'
-                              : 'bg-red-500/20 text-red-300'
+                              ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300'
+                              : 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-300'
                           }`}
                         >
                           {ext}
@@ -294,7 +294,7 @@ export default function AdminSettings() {
               {hasChanges && (
                 <button
                   onClick={handleReset}
-                  className="px-6 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 rounded-lg transition"
+                  className="px-6 py-3 bg-slate-200 dark:bg-slate-700/50 hover:bg-slate-300 dark:hover:bg-slate-600/50 text-slate-700 dark:text-slate-300 rounded-lg transition"
                 >
                   Reset
                 </button>
@@ -302,7 +302,7 @@ export default function AdminSettings() {
               {saveResult && (
                 <span
                   className={`text-sm ${
-                    saveResult.type === 'success' ? 'text-green-400' : 'text-red-400'
+                    saveResult.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'
                   }`}
                 >
                   {saveResult.type === 'success' ? '✓' : '✕'} {saveResult.message}
@@ -311,17 +311,17 @@ export default function AdminSettings() {
             </div>
           </>
         ) : (
-          <div className="text-red-400">Failed to load settings</div>
+          <div className="text-red-500 dark:text-red-400">Failed to load settings</div>
         )}
 
         {/* Static Service Configuration */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">⚙️ Service Configuration</h3>
+        <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm dark:shadow-none">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">⚙️ Service Configuration</h3>
           <div className="space-y-3">
             {STATIC_CONFIG.map(cfg => (
-              <div key={cfg.name} className="flex justify-between items-center py-2 border-b border-slate-700/30">
-                <span className="text-slate-400 text-sm">{cfg.name}</span>
-                <span className="text-white text-sm font-mono">{cfg.value}</span>
+              <div key={cfg.name} className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700/30">
+                <span className="text-slate-500 dark:text-slate-400 text-sm">{cfg.name}</span>
+                <span className="text-slate-900 dark:text-white text-sm font-mono">{cfg.value}</span>
               </div>
             ))}
           </div>
@@ -329,35 +329,35 @@ export default function AdminSettings() {
 
         {/* Statistics Summary */}
         {stats && (
-          <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">📊 Statistics Summary</h3>
+          <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm dark:shadow-none">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">📊 Statistics Summary</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="text-center p-3 bg-slate-700/20 rounded-lg">
-                <div className="text-2xl font-bold text-white">{stats.totalSnippets}</div>
-                <div className="text-xs text-slate-400 mt-1">Total</div>
+              <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg">
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totalSnippets}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total</div>
               </div>
-              <div className="text-center p-3 bg-slate-700/20 rounded-lg">
-                <div className="text-2xl font-bold text-green-400">{stats.activeSnippets}</div>
-                <div className="text-xs text-slate-400 mt-1">Active</div>
+              <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.activeSnippets}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Active</div>
               </div>
-              <div className="text-center p-3 bg-slate-700/20 rounded-lg">
-                <div className="text-2xl font-bold text-red-400">{stats.deletedSnippets}</div>
-                <div className="text-xs text-slate-400 mt-1">Deleted</div>
+              <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg">
+                <div className="text-2xl font-bold text-red-500 dark:text-red-400">{stats.deletedSnippets}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Deleted</div>
               </div>
-              <div className="text-center p-3 bg-slate-700/20 rounded-lg">
-                <div className="text-2xl font-bold text-blue-400">{stats.todaySnippets}</div>
-                <div className="text-xs text-slate-400 mt-1">Today</div>
+              <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.todaySnippets}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Today</div>
               </div>
             </div>
           </div>
         )}
 
         {/* Supported Languages */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">🎨 Supported Languages</h3>
+        <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm dark:shadow-none">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">🎨 Supported Languages</h3>
           <div className="flex flex-wrap gap-2">
             {SUPPORTED_LANGUAGES.map(lang => (
-              <span key={lang} className="px-3 py-1 bg-slate-700/50 text-slate-300 rounded-full text-xs">
+              <span key={lang} className="px-3 py-1 bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-full text-xs">
                 {lang}
               </span>
             ))}

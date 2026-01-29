@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import QRCodeModal from '@/components/QRCodeModal';
+import SharePanel from '@/components/SharePanel';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface FileData {
   id: string;
@@ -52,6 +55,9 @@ function isImageFile(mimeType: string): boolean {
 }
 
 export default function FileClient({ initialData }: FileClientProps) {
+  const searchParams = useSearchParams();
+  const isCreated = searchParams.get('created') === 'true';
+
   const [fileData] = useState<FileData>(initialData);
   const [password, setPassword] = useState('');
   const [unlocking, setUnlocking] = useState(false);
@@ -79,7 +85,9 @@ export default function FileClient({ initialData }: FileClientProps) {
     return 'Less than an hour remaining';
   };
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/${fileData.id}`
+    : '';
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -208,13 +216,13 @@ export default function FileClient({ initialData }: FileClientProps) {
   // Password protected view
   if (!unlocked) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🔐</div>
-            <h1 className="text-2xl text-white mb-2">Password Protected File</h1>
-            <p className="text-slate-400">This file requires a password to download</p>
-            <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-400">
+            <h1 className="text-2xl text-slate-900 dark:text-white mb-2">Password Protected File</h1>
+            <p className="text-slate-500 dark:text-slate-400">This file requires a password to download</p>
+            <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-500 dark:text-slate-400">
               <span>{getFileIcon(fileData.fileType)} {fileData.fileName}</span>
               <span>·</span>
               <span>{formatFileSize(fileData.fileSize)}</span>
@@ -227,12 +235,12 @@ export default function FileClient({ initialData }: FileClientProps) {
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
               autoFocus
             />
 
             {error && (
-              <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm">
+              <div className="p-3 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300 text-sm">
                 {error}
               </div>
             )}
@@ -247,7 +255,7 @@ export default function FileClient({ initialData }: FileClientProps) {
           </form>
 
           <div className="mt-6 text-center">
-            <Link href="/" className="text-slate-400 hover:text-white transition">
+            <Link href="/" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
               ← Back to Home
             </Link>
           </div>
@@ -257,24 +265,25 @@ export default function FileClient({ initialData }: FileClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="text-slate-400 hover:text-white transition flex items-center gap-2"
+            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2"
           >
             <span>←</span>
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-bold">
+            <span className="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent font-bold">
               snipit.sh
             </span>
           </Link>
 
           <div className="flex gap-2">
+            <ThemeToggle />
             <button
               onClick={() => setShowQR(true)}
-              className="px-4 py-2 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 text-slate-300 rounded-lg transition"
+              className="px-4 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition"
               title="Show QR Code"
             >
               📱 QR
@@ -288,20 +297,30 @@ export default function FileClient({ initialData }: FileClientProps) {
           </div>
         </div>
 
+        {/* Share Panel (shown after creation) */}
+        {isCreated && (
+          <SharePanel
+            url={shareUrl}
+            burnAfterRead={fileData.burnAfterRead}
+            onShowQR={() => setShowQR(true)}
+            type="file"
+          />
+        )}
+
         {/* QR Code Modal */}
         <QRCodeModal url={shareUrl} show={showQR} onClose={() => setShowQR(false)} />
 
         {/* File Info Card */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 mb-6">
+        <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 mb-6 shadow-sm dark:shadow-none">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="text-5xl">{getFileIcon(fileData.fileType)}</div>
               <div>
-                <h1 className="text-2xl text-white font-semibold mb-1">
+                <h1 className="text-2xl text-slate-900 dark:text-white font-semibold mb-1">
                   {fileData.fileName}
                 </h1>
-                <div className="flex flex-wrap gap-3 text-sm text-slate-400">
-                  <span className="px-2 py-1 bg-slate-700/50 rounded">
+                <div className="flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
+                  <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700/50 rounded">
                     {fileData.fileType}
                   </span>
                   <span>{formatFileSize(fileData.fileSize)}</span>
@@ -315,12 +334,12 @@ export default function FileClient({ initialData }: FileClientProps) {
 
             <div className="flex flex-col items-end gap-2">
               {fileData.burnAfterRead && (
-                <span className="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-sm flex items-center gap-1">
+                <span className="px-3 py-1 bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-300 rounded-full text-sm flex items-center gap-1">
                   🔥 Burns after download
                 </span>
               )}
               {getTimeRemaining() && (
-                <span className="text-slate-400 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-sm">
                   ⏰ {getTimeRemaining()}
                 </span>
               )}
@@ -330,7 +349,7 @@ export default function FileClient({ initialData }: FileClientProps) {
 
         {/* Burn Warning */}
         {fileData.burnAfterRead && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">
             ⚠️ This file will be deleted after downloading. Make sure to save it!
           </div>
         )}
@@ -353,22 +372,22 @@ export default function FileClient({ initialData }: FileClientProps) {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">
             {error}
           </div>
         )}
 
         {/* Preview */}
         {previewLoading && (
-          <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-center text-slate-400">
+          <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 shadow-sm dark:shadow-none">
             Loading preview...
           </div>
         )}
 
         {imageUrl && (
-          <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-            <div className="px-4 py-2 bg-slate-800/50 border-b border-slate-700/50">
-              <span className="text-slate-400 text-sm">Preview</span>
+          <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700/50">
+              <span className="text-slate-500 dark:text-slate-400 text-sm">Preview</span>
             </div>
             <div className="p-4 flex justify-center">
               <img
@@ -381,15 +400,15 @@ export default function FileClient({ initialData }: FileClientProps) {
         )}
 
         {preview && (
-          <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-b border-slate-700/50">
-              <span className="text-slate-400 text-sm">Preview</span>
-              <span className="text-slate-400 text-sm">
+          <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+            <div className="flex items-center justify-between px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700/50">
+              <span className="text-slate-500 dark:text-slate-400 text-sm">Preview</span>
+              <span className="text-slate-500 dark:text-slate-400 text-sm">
                 {preview.split('\n').length} lines
               </span>
             </div>
             <div className="overflow-auto max-h-[70vh]">
-              <pre className="p-4 text-white font-mono text-sm whitespace-pre-wrap break-words">
+              <pre className="p-4 text-slate-900 dark:text-white font-mono text-sm whitespace-pre-wrap break-words">
                 {preview}
               </pre>
             </div>

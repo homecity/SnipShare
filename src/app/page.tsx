@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_ALLOWED_EXTENSIONS as SHARED_ALLOWED_EXTENSIONS } from '@/lib/constants';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const LANGUAGES = [
   'plaintext', 'javascript', 'typescript', 'python', 'java', 'c', 'cpp', 'csharp',
@@ -160,7 +161,7 @@ export default function Home() {
         throw new Error(data.error || 'Failed to create snippet');
       }
 
-      router.push(`/${data.id}`);
+      router.push(`/${data.id}?created=true`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -216,7 +217,7 @@ export default function Home() {
       });
 
       if (data.id) {
-        router.push(`/${data.id}`);
+        router.push(`/${data.id}?created=true`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -227,21 +228,24 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <header className="text-center mb-8 relative">
+          <div className="absolute right-0 top-0">
+            <ThemeToggle />
+          </div>
+          <h1 className="text-4xl font-bold mb-2">
+            <span className="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
               snipit.sh
             </span>
           </h1>
-          <p className="text-slate-400">Share text, code, and files securely</p>
+          <p className="text-slate-500 dark:text-slate-400">Share text, code, and files securely</p>
         </header>
 
         {/* Security Banner */}
-        <div className="mb-6 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-3">
+        <div className="mb-6 px-4 py-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/20 rounded-lg flex items-center gap-3">
           <span className="text-xl shrink-0">🛡️</span>
-          <p className="text-emerald-300 text-sm">
+          <p className="text-emerald-700 dark:text-emerald-300 text-sm">
             <span className="font-semibold">Encrypted at rest.</span>{' '}
             All snippets and files are securely encrypted before storage — even administrators cannot access your data.
           </p>
@@ -249,13 +253,13 @@ export default function Home() {
 
         {/* Tabs */}
         <div className="flex justify-center mb-6">
-          <div className="inline-flex bg-slate-800/50 border border-slate-700 rounded-lg p-1">
+          <div className="inline-flex bg-slate-200/80 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg p-1">
             <button
               onClick={() => { setTab('text'); setError(''); }}
               className={`px-6 py-2 rounded-md text-sm font-medium transition ${
                 tab === 'text'
                   ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               📝 Text
@@ -265,7 +269,7 @@ export default function Home() {
               className={`px-6 py-2 rounded-md text-sm font-medium transition ${
                 tab === 'file'
                   ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               📁 File
@@ -282,7 +286,7 @@ export default function Home() {
                 placeholder="Title (optional)"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 maxLength={100}
               />
             </div>
@@ -292,7 +296,7 @@ export default function Home() {
                 placeholder="Paste your text or code here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full h-64 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition font-mono text-sm resize-y"
+                className="w-full h-64 px-4 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition font-mono text-sm resize-y"
                 required
               />
             </div>
@@ -300,11 +304,11 @@ export default function Home() {
             {/* Options Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm text-slate-400 mb-2">Language</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">Language</label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  className="w-full px-4 py-2 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 >
                   {LANGUAGES.map((lang) => (
                     <option key={lang} value={lang}>
@@ -314,11 +318,11 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-2">Expires In</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">Expires In</label>
                 <select
                   value={expiresIn}
                   onChange={(e) => setExpiresIn(Number(e.target.value))}
-                  className="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  className="w-full px-4 py-2 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 >
                   {EXPIRATION_OPTIONS.map((option) => (
                     <option key={option.label} value={option.value}>
@@ -328,13 +332,13 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-2">Password (optional)</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">Password (optional)</label>
                 <input
                   type="password"
                   placeholder="Set a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  className="w-full px-4 py-2 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 />
               </div>
               <div className="flex items-end">
@@ -343,15 +347,15 @@ export default function Home() {
                     type="checkbox"
                     checked={burnAfterRead}
                     onChange={(e) => setBurnAfterRead(e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-700 bg-slate-800/50 text-purple-500 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
+                    className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-purple-500 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
                   />
-                  <span className="text-slate-300">Burn after reading</span>
+                  <span className="text-slate-700 dark:text-slate-300">Burn after reading</span>
                 </label>
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+              <div className="p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">
                 {error}
               </div>
             )}
@@ -378,10 +382,10 @@ export default function Home() {
               onClick={() => fileInputRef.current?.click()}
               className={`relative border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition ${
                 dragActive
-                  ? 'border-purple-400 bg-purple-500/10'
+                  ? 'border-purple-400 bg-purple-100/50 dark:bg-purple-500/10'
                   : file
-                  ? 'border-green-500/50 bg-green-500/5'
-                  : 'border-slate-600 hover:border-purple-500/50 hover:bg-slate-800/30'
+                  ? 'border-green-400 dark:border-green-500/50 bg-green-50 dark:bg-green-500/5'
+                  : 'border-slate-300 dark:border-slate-600 hover:border-purple-400 dark:hover:border-purple-500/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/30'
               }`}
             >
               <input
@@ -395,8 +399,8 @@ export default function Home() {
               {file ? (
                 <div>
                   <div className="text-4xl mb-3">✅</div>
-                  <p className="text-white font-medium text-lg mb-1">{file.name}</p>
-                  <p className="text-slate-400 text-sm">{formatFileSize(file.size)}</p>
+                  <p className="text-slate-900 dark:text-white font-medium text-lg mb-1">{file.name}</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm">{formatFileSize(file.size)}</p>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -404,7 +408,7 @@ export default function Home() {
                       setFile(null);
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
-                    className="mt-3 px-4 py-1.5 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 rounded-lg text-sm transition"
+                    className="mt-3 px-4 py-1.5 bg-slate-200 dark:bg-slate-700/50 hover:bg-slate-300 dark:hover:bg-slate-600/50 text-slate-700 dark:text-slate-300 rounded-lg text-sm transition"
                   >
                     Change file
                   </button>
@@ -412,10 +416,10 @@ export default function Home() {
               ) : (
                 <div>
                   <div className="text-4xl mb-3">📤</div>
-                  <p className="text-white font-medium text-lg mb-1">
+                  <p className="text-slate-900 dark:text-white font-medium text-lg mb-1">
                     Drop a file here or click to browse
                   </p>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-slate-500 dark:text-slate-400 text-sm">
                     Max {maxFileSizeMb}MB · Text, code, images, PDF, ZIP
                   </p>
                 </div>
@@ -424,12 +428,12 @@ export default function Home() {
 
             {/* Upload Progress */}
             {isSubmitting && uploadProgress > 0 && (
-              <div className="w-full bg-slate-800/50 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-slate-200 dark:bg-slate-800/50 rounded-full h-3 overflow-hidden">
                 <div
                   className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
-                <p className="text-slate-400 text-sm text-center mt-2">
+                <p className="text-slate-500 dark:text-slate-400 text-sm text-center mt-2">
                   Uploading... {uploadProgress}%
                 </p>
               </div>
@@ -438,11 +442,11 @@ export default function Home() {
             {/* Options Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm text-slate-400 mb-2">Expires In</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">Expires In</label>
                 <select
                   value={expiresIn}
                   onChange={(e) => setExpiresIn(Number(e.target.value))}
-                  className="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  className="w-full px-4 py-2 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 >
                   {EXPIRATION_OPTIONS.map((option) => (
                     <option key={option.label} value={option.value}>
@@ -452,13 +456,13 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-2">Password (optional)</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-2">Password (optional)</label>
                 <input
                   type="password"
                   placeholder="Set a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  className="w-full px-4 py-2 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 />
               </div>
               <div className="flex items-end">
@@ -467,15 +471,15 @@ export default function Home() {
                     type="checkbox"
                     checked={burnAfterRead}
                     onChange={(e) => setBurnAfterRead(e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-700 bg-slate-800/50 text-purple-500 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
+                    className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-purple-500 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
                   />
-                  <span className="text-slate-300">Burn after reading</span>
+                  <span className="text-slate-700 dark:text-slate-300">Burn after reading</span>
                 </label>
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+              <div className="p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">
                 {error}
               </div>
             )}
@@ -492,34 +496,34 @@ export default function Home() {
 
         {/* Features */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-5 gap-6">
-          <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
+          <div className="p-6 bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-sm dark:shadow-none">
             <div className="text-3xl mb-3">📁</div>
-            <h3 className="text-white font-semibold mb-2">File Sharing</h3>
-            <p className="text-slate-400 text-sm">Upload and share files up to 5MB securely</p>
+            <h3 className="text-slate-900 dark:text-white font-semibold mb-2">File Sharing</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Upload and share files up to 5MB securely</p>
           </div>
-          <div className="p-6 bg-emerald-900/20 border border-emerald-700/30 rounded-xl">
+          <div className="p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/30 rounded-xl shadow-sm dark:shadow-none">
             <div className="text-3xl mb-3">🔐</div>
-            <h3 className="text-white font-semibold mb-2">Encrypted Storage</h3>
-            <p className="text-slate-400 text-sm">All content is AES-256 encrypted at rest by default — zero access for anyone but you</p>
+            <h3 className="text-slate-900 dark:text-white font-semibold mb-2">Encrypted Storage</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">All content is AES-256 encrypted at rest by default — zero access for anyone but you</p>
           </div>
-          <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
+          <div className="p-6 bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-sm dark:shadow-none">
             <div className="text-3xl mb-3">🔒</div>
-            <h3 className="text-white font-semibold mb-2">Password Protection</h3>
-            <p className="text-slate-400 text-sm">Add an extra layer of password encryption on top</p>
+            <h3 className="text-slate-900 dark:text-white font-semibold mb-2">Password Protection</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Add an extra layer of password encryption on top</p>
           </div>
-          <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
+          <div className="p-6 bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-sm dark:shadow-none">
             <div className="text-3xl mb-3">⏰</div>
-            <h3 className="text-white font-semibold mb-2">Auto-Expiration</h3>
-            <p className="text-slate-400 text-sm">Set snippets to expire automatically after a set time</p>
+            <h3 className="text-slate-900 dark:text-white font-semibold mb-2">Auto-Expiration</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Set snippets to expire automatically after a set time</p>
           </div>
-          <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
+          <div className="p-6 bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-sm dark:shadow-none">
             <div className="text-3xl mb-3">🔥</div>
-            <h3 className="text-white font-semibold mb-2">Burn After Reading</h3>
-            <p className="text-slate-400 text-sm">One-time view that deletes after being accessed</p>
+            <h3 className="text-slate-900 dark:text-white font-semibold mb-2">Burn After Reading</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">One-time view that deletes after being accessed</p>
           </div>
         </div>
 
-        <footer className="mt-12 text-center text-slate-500 text-sm">
+        <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm">
           <p>No login required. Your snippets are yours.</p>
         </footer>
       </div>
