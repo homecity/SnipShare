@@ -14,27 +14,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SnipShare - Share Text & Code Snippets Securely",
-    template: "%s | SnipShare",
+    default: "snipit.sh - Share Text & Code Snippets Securely",
+    template: "%s | snipit.sh",
   },
   description: "Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading features. No login required. Free and open source pastebin alternative.",
   keywords: ["paste", "pastebin", "code sharing", "text sharing", "snippet", "share code", "pastebin alternative", "secure paste", "code snippet", "burn after read"],
   openGraph: {
-    title: "SnipShare - Share Text & Code Snippets Securely",
+    title: "snipit.sh - Share Text & Code Snippets Securely",
     description: "Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading. No login required.",
     type: "website",
-    siteName: "SnipShare",
-    url: "https://steveyu.au",
+    siteName: "snipit.sh",
+    url: "https://snipit.sh",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "SnipShare - Share Text & Code Snippets Securely",
+    title: "snipit.sh - Share Text & Code Snippets Securely",
     description: "Share text and code snippets securely. No login required.",
   },
-  metadataBase: new URL("https://steveyu.au"),
+  metadataBase: new URL("https://snipit.sh"),
   alternates: {
-    canonical: "https://steveyu.au",
+    canonical: "https://snipit.sh",
   },
   robots: {
     index: true,
@@ -49,8 +49,8 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "SnipShare",
-  url: "https://steveyu.au",
+  name: "snipit.sh",
+  url: "https://snipit.sh",
   description: "Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading features.",
   applicationCategory: "DeveloperApplication",
   operatingSystem: "Any",

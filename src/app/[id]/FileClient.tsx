@@ -267,7 +267,7 @@ export default function FileClient({ initialData }: FileClientProps) {
           >
             <span>←</span>
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-bold">
-              SnipShare
+              snipit.sh
             </span>
           </Link>
 

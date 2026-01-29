@@ -80,7 +80,7 @@ export default function AdminShell({ children }: AdminShellProps) {
             <Link href="/" className="inline-block">
               <h1 className="text-3xl font-bold">
                 <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  SnipShare
+                  snipit.sh
                 </span>
               </h1>
             </Link>
@@ -126,7 +126,7 @@ export default function AdminShell({ children }: AdminShellProps) {
       <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-slate-800/80 border-b border-slate-700">
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white text-2xl">☰</button>
         <Link href="/" className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-bold text-lg">
-          SnipShare Admin
+          snipit.sh Admin
         </Link>
         <button onClick={handleLogout} className="text-slate-400 hover:text-white text-sm">Logout</button>
       </div>
@@ -138,7 +138,7 @@ export default function AdminShell({ children }: AdminShellProps) {
             <Link href="/" className="block mb-8">
               <h1 className="text-xl font-bold">
                 <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  SnipShare
+                  snipit.sh
                 </span>
               </h1>
               <p className="text-slate-500 text-sm">Admin Panel</p>

@@ -232,7 +232,7 @@ export default function Home() {
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              SnipShare
+              snipit.sh
             </span>
           </h1>
           <p className="text-slate-400">Share text, code, and files securely</p>

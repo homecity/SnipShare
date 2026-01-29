@@ -125,7 +125,7 @@ export default function AdminSettings() {
     { name: 'Database', value: 'Cloudflare D1 (SQLite)' },
     { name: 'File Storage', value: 'Cloudflare R2' },
     { name: 'Runtime', value: 'Cloudflare Workers (OpenNext)' },
-    { name: 'Domain', value: 'steveyu.au' },
+    { name: 'Domain', value: 'snipit.sh' },
   ];
 
   const SUPPORTED_LANGUAGES = [

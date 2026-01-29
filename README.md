@@ -1,8 +1,8 @@
-# SnipShare
+# snipit.sh
 
 Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading features. No login required.
 
-![SnipShare](SnipShare.gif)
+![snipit.sh](SnipShare.gif)
 
 ## Features
 
@@ -33,8 +33,8 @@ Share text and code snippets securely with password protection, auto-expiration,
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/homecity/SnipShare.git
-   cd SnipShare
+   git clone https://github.com/homecity/snipshare.git
+   cd snipshare
    ```
 
 2. **Install dependencies:**

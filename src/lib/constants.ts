@@ -1,5 +1,5 @@
 /**
- * Shared constants for SnipShare
+ * Shared constants for snipit.sh
  * Used by both frontend and backend to keep file extension lists in sync.
  */
 

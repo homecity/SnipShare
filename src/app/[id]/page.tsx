@@ -31,8 +31,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         ? `${snippet.file_name} - Shared File`
         : 'Shared File';
       const description = snippet.is_encrypted
-        ? 'This file is password protected. Enter the password to download it on SnipShare.'
-        : `A file shared via SnipShare. ${snippet.file_name || ''} (${formatSize(snippet.file_size || 0)})`;
+        ? 'This file is password protected. Enter the password to download it on snipit.sh.'
+        : `A file shared via snipit.sh. ${snippet.file_name || ''} (${formatSize(snippet.file_size || 0)})`;
 
       return {
         title,
@@ -46,16 +46,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       : `${snippet.language.charAt(0).toUpperCase() + snippet.language.slice(1)} Snippet`;
 
     const description = snippet.is_encrypted
-      ? 'This snippet is password protected. Enter the password to view it on SnipShare.'
-      : `A ${snippet.language} code snippet shared via SnipShare. View count: ${snippet.view_count}.`;
+      ? 'This snippet is password protected. Enter the password to view it on snipit.sh.'
+      : `A ${snippet.language} code snippet shared via snipit.sh. View count: ${snippet.view_count}.`;
 
-    const url = `https://steveyu.au/${id}`;
+    const url = `https://snipit.sh/${id}`;
 
     return {
       title,
       description,
       alternates: { canonical: url },
-      openGraph: { title, description, type: 'article', siteName: 'SnipShare', url },
+      openGraph: { title, description, type: 'article', siteName: 'snipit.sh', url },
       twitter: { card: 'summary', title, description },
       robots: {
         index: !snippet.burn_after_read && !snippet.is_encrypted,
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   } catch {
     return {
-      title: 'SnipShare',
+      title: 'snipit.sh',
       description: 'Share text and code snippets securely',
     };
   }

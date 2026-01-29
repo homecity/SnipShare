@@ -16,7 +16,7 @@ export default function QRCodeModal({ url, show, onClose }: QRCodeModalProps) {
     const canvas = canvasRef.current?.querySelector('canvas');
     if (!canvas) return;
     const link = document.createElement('a');
-    link.download = 'snipshare-qr.png';
+    link.download = 'snipit-sh-qr.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
   }, []);
