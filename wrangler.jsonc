@@ -4,9 +4,6 @@
   "name": "snipshare",
   "compatibility_date": "2025-05-05",
   "compatibility_flags": ["nodejs_compat"],
-  "vars": {
-    "ADMIN_PASSWORD": "snipshare-admin-2025"
-  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
