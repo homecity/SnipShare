@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { createSnippet, checkRateLimit, getSettings } from '@/lib/db';
-import { encryptBuffer } from '@/lib/encryption';
+import { encryptBuffer, generateEncryptionKey, encryptWithKey } from '@/lib/encryption';
 import { getD1Db, getR2Bucket } from '@/lib/d1';
 import { blockedIps } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
@@ -118,24 +118,28 @@ export async function POST(request: NextRequest) {
     // Read file data
     let fileData: ArrayBuffer = await file.arrayBuffer();
 
-    // Encrypt if password provided
+    // Step 1: Server-side encryption (always applied)
+    const serverKey = await generateEncryptionKey();
+    fileData = await encryptWithKey(fileData, serverKey);
+
+    // Step 2: Password encryption on top (if password provided)
     if (password) {
       fileData = await encryptBuffer(fileData, password);
     }
 
-    // Upload to R2
+    // Upload encrypted data to R2
     await r2.put(r2Key, fileData, {
       httpMetadata: {
-        contentType: password ? 'application/octet-stream' : mimeType,
+        contentType: 'application/octet-stream',
       },
       customMetadata: {
         originalName: file.name,
         originalType: mimeType,
-        encrypted: password ? 'true' : 'false',
+        encrypted: 'true',
       },
     });
 
-    // Create snippet record in D1
+    // Create snippet record in D1 (encryption_key stored here, NOT in R2)
     const snippet = await createSnippet(db, {
       id,
       content: '', // No text content for files
@@ -149,6 +153,7 @@ export async function POST(request: NextRequest) {
       fileSize: file.size,
       fileType: mimeType,
       r2Key,
+      encryptionKey: serverKey,
     });
 
     return NextResponse.json({

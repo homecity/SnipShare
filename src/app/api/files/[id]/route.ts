@@ -5,7 +5,7 @@ import {
   markAsDeleted,
   verifyPassword,
 } from '@/lib/db';
-import { decryptBuffer } from '@/lib/encryption';
+import { decryptBuffer, decryptWithKey } from '@/lib/encryption';
 import { getD1Db, getR2Bucket } from '@/lib/d1';
 import { isAdminAuthenticated, getAdminPassword } from '@/lib/admin-auth';
 
@@ -65,13 +65,21 @@ export async function GET(
         );
       }
 
-      const encryptedData = await r2Object.arrayBuffer();
-      const decryptedData = await decryptBuffer(encryptedData, password);
-      if (!decryptedData) {
+      let fileData = await r2Object.arrayBuffer();
+
+      // Step 1: Remove password encryption layer first
+      const decryptedByPassword = await decryptBuffer(fileData, password);
+      if (!decryptedByPassword) {
         return NextResponse.json(
           { error: 'Failed to decrypt file' },
           { status: 500 }
         );
+      }
+      fileData = decryptedByPassword;
+
+      // Step 2: Remove server-side encryption layer
+      if (snippet.encryption_key) {
+        fileData = await decryptWithKey(fileData, snippet.encryption_key);
       }
 
       await incrementViewCount(db, id);
@@ -81,16 +89,16 @@ export async function GET(
         await r2.delete(snippet.r2_key!);
       }
 
-      return new NextResponse(decryptedData, {
+      return new NextResponse(fileData, {
         headers: {
           'Content-Type': snippet.file_type || 'application/octet-stream',
           'Content-Disposition': `attachment; filename="${encodeURIComponent(snippet.file_name || 'download')}"`,
-          'Content-Length': String(decryptedData.byteLength),
+          'Content-Length': String(fileData.byteLength),
         },
       });
     }
 
-    // Non-encrypted file
+    // Non-password-protected file
     const r2Object = await r2.get(snippet.r2_key!);
     if (!r2Object) {
       return NextResponse.json(
@@ -99,14 +107,19 @@ export async function GET(
       );
     }
 
+    let data = await r2Object.arrayBuffer();
+
+    // Decrypt server-side encryption if key exists (backward compatible)
+    if (snippet.encryption_key) {
+      data = await decryptWithKey(data, snippet.encryption_key);
+    }
+
     await incrementViewCount(db, id);
 
     if (snippet.burn_after_read) {
       await markAsDeleted(db, id);
       await r2.delete(snippet.r2_key!);
     }
-
-    const data = await r2Object.arrayBuffer();
 
     return new NextResponse(data, {
       headers: {

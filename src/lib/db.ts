@@ -25,6 +25,7 @@ export interface CreateSnippetInput {
   fileSize?: number;
   fileType?: string;
   r2Key?: string;
+  encryptionKey?: string;
 }
 
 // Create a new snippet
@@ -45,6 +46,7 @@ export async function createSnippet(
     fileSize,
     fileType,
     r2Key,
+    encryptionKey,
   } = input;
 
   const expiresAt = expiresIn ? Date.now() + expiresIn : null;
@@ -76,6 +78,7 @@ export async function createSnippet(
     file_size: fileSize || null,
     file_type: fileType || null,
     r2_key: r2Key || null,
+    encryption_key: encryptionKey || null,
   };
 
   await db.insert(snippets).values(snippet);

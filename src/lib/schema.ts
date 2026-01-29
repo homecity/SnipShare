@@ -19,6 +19,7 @@ export const snippets = sqliteTable('snippets', {
   file_size: integer('file_size'),
   file_type: text('file_type'),
   r2_key: text('r2_key'),
+  encryption_key: text('encryption_key'), // Base64 AES-256 key for server-side encryption
 });
 
 export const rateLimits = sqliteTable('rate_limits', {

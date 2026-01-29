@@ -13,6 +13,8 @@ export const DEFAULT_ALLOWED_EXTENSIONS = [
   '.odt', '.ods', '.odp',
   // Archives
   '.zip', '.tar', '.gz', '.7z', '.rar', '.bz2',
+  // Torrents
+  '.torrent',
   // Frontend frameworks
   '.jsx', '.tsx', '.vue', '.svelte',
   // Programming languages
@@ -74,6 +76,8 @@ export const EXTENSION_TO_MIME: Record<string, string> = {
   '.7z': 'application/x-7z-compressed',
   '.rar': 'application/vnd.rar',
   '.bz2': 'application/x-bzip2',
+  // Torrents
+  '.torrent': 'application/x-bittorrent',
   // Frontend frameworks
   '.jsx': 'text/jsx',
   '.tsx': 'text/tsx',

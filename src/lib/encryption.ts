@@ -98,6 +98,72 @@ export async function decryptContent(
   }
 }
 
+// ── Server-side encryption (per-file random key) ──────────────────────
+
+// Generate a random AES-256 key, return as Base64
+export async function generateEncryptionKey(): Promise<string> {
+  const key = await crypto.subtle.generateKey(
+    { name: 'AES-GCM', length: 256 },
+    true, // extractable
+    ['encrypt', 'decrypt']
+  );
+  const raw = await crypto.subtle.exportKey('raw', key);
+  return arrayBufferToBase64(raw);
+}
+
+// Encrypt ArrayBuffer with a Base64-encoded AES-256 key (IV prepended)
+export async function encryptWithKey(
+  data: ArrayBuffer,
+  keyBase64: string
+): Promise<ArrayBuffer> {
+  const rawKey = base64ToArrayBuffer(keyBase64);
+  const key = await crypto.subtle.importKey(
+    'raw',
+    rawKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt']
+  );
+
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv as unknown as BufferSource },
+    key,
+    data
+  );
+
+  // Pack: iv(12) + ciphertext (includes auth tag)
+  const result = new Uint8Array(12 + encrypted.byteLength);
+  result.set(iv, 0);
+  result.set(new Uint8Array(encrypted), 12);
+  return result.buffer;
+}
+
+// Decrypt ArrayBuffer with a Base64-encoded AES-256 key (IV prepended)
+export async function decryptWithKey(
+  data: ArrayBuffer,
+  keyBase64: string
+): Promise<ArrayBuffer> {
+  const rawKey = base64ToArrayBuffer(keyBase64);
+  const key = await crypto.subtle.importKey(
+    'raw',
+    rawKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  );
+
+  const bytes = new Uint8Array(data);
+  const iv = bytes.slice(0, 12);
+  const ciphertext = bytes.slice(12);
+
+  return await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: iv as unknown as BufferSource },
+    key,
+    ciphertext
+  );
+}
+
 // Hash password with PBKDF2 (for storage/verification)
 export async function hashPassword(
   password: string
