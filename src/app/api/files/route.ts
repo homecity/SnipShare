@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { createSnippet, checkRateLimit } from '@/lib/db';
-import { encryptBuffer, hashPassword } from '@/lib/encryption';
+import { createSnippet, checkRateLimit, getSettings } from '@/lib/db';
+import { encryptBuffer } from '@/lib/encryption';
 import { getD1Db, getR2Bucket } from '@/lib/d1';
 import { blockedIps } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-const ALLOWED_EXTENSIONS = new Set([
-  '.txt', '.md', '.pdf', '.json', '.csv', '.log', '.xml', '.yaml', '.yml',
-  '.html', '.css', '.js', '.ts', '.py', '.sh', '.sql',
-  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg',
-  '.zip',
-]);
 
 const EXTENSION_TO_MIME: Record<string, string> = {
   '.txt': 'text/plain',
@@ -51,6 +42,7 @@ export async function POST(request: NextRequest) {
   try {
     const db = await getD1Db();
     const r2 = await getR2Bucket();
+    const cfg = await getSettings(db);
 
     const ip =
       request.headers.get('cf-connecting-ip') ||
@@ -70,20 +62,29 @@ export async function POST(request: NextRequest) {
       // blocked_ips table might not exist yet
     }
 
-    // Rate limit: 20/hour (shared with text snippets via 'create' action)
-    const hourAllowed = await checkRateLimit(db, ip, 'create', 20, 60 * 60 * 1000);
-    if (!hourAllowed) {
+    // Rate limit: per minute
+    const minuteAllowed = await checkRateLimit(db, ip, 'create', cfg.rate_limit_per_minute, 60000);
+    if (!minuteAllowed) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded. Max 20 uploads per hour.' },
+        { error: `Too many requests. Max ${cfg.rate_limit_per_minute} per minute.` },
         { status: 429 }
       );
     }
 
-    // Daily rate limit: 100/day
-    const dayAllowed = await checkRateLimit(db, ip, 'create_daily', 100, 24 * 60 * 60 * 1000);
+    // Rate limit: per hour
+    const hourAllowed = await checkRateLimit(db, ip, 'create_hour', cfg.rate_limit_per_hour, 60 * 60 * 1000);
+    if (!hourAllowed) {
+      return NextResponse.json(
+        { error: `Rate limit exceeded. Max ${cfg.rate_limit_per_hour} per hour.` },
+        { status: 429 }
+      );
+    }
+
+    // Rate limit: per day
+    const dayAllowed = await checkRateLimit(db, ip, 'create_daily', cfg.rate_limit_per_day, 24 * 60 * 60 * 1000);
     if (!dayAllowed) {
       return NextResponse.json(
-        { error: 'Daily rate limit exceeded. Max 100 uploads per day.' },
+        { error: `Daily rate limit exceeded. Max ${cfg.rate_limit_per_day} per day.` },
         { status: 429 }
       );
     }
@@ -98,10 +99,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File is required' }, { status: 400 });
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
+    // Validate file size (dynamic from settings)
+    const maxFileSize = cfg.max_file_size_mb * 1024 * 1024;
+    if (file.size > maxFileSize) {
       return NextResponse.json(
-        { error: 'File too large. Maximum 5MB allowed.' },
+        { error: `File too large. Maximum ${cfg.max_file_size_mb}MB allowed.` },
         { status: 400 }
       );
     }
@@ -110,9 +112,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File is empty' }, { status: 400 });
     }
 
-    // Validate file extension
+    // Validate file extension (dynamic from settings)
+    const allowedExtensions = new Set(
+      cfg.allowed_file_types.split(',').map(s => s.trim().toLowerCase())
+    );
     const ext = getFileExtension(file.name);
-    if (!ext || !ALLOWED_EXTENSIONS.has(ext)) {
+    if (!ext || !allowedExtensions.has(ext)) {
       return NextResponse.json(
         { error: `File type "${ext || 'unknown'}" is not allowed.` },
         { status: 400 }

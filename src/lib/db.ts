@@ -1,6 +1,6 @@
 import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1';
 import { eq, and, lt } from 'drizzle-orm';
-import { snippets, rateLimits } from './schema';
+import { snippets, rateLimits, settings } from './schema';
 import type { Snippet } from './schema';
 import { hashPassword, verifyPasswordHash } from './encryption';
 
@@ -177,6 +177,58 @@ export async function cleanupExpiredSnippets(
     );
 
   return result.meta?.changes ?? 0;
+}
+
+// ── Settings ──────────────────────────────────────────────
+
+export interface AppSettings {
+  rate_limit_per_minute: number;
+  rate_limit_per_hour: number;
+  rate_limit_per_day: number;
+  max_file_size_mb: number;
+  allowed_file_types: string; // comma-separated extensions
+}
+
+const DEFAULT_SETTINGS: AppSettings = {
+  rate_limit_per_minute: 10,
+  rate_limit_per_hour: 20,
+  rate_limit_per_day: 100,
+  max_file_size_mb: 5,
+  allowed_file_types: '.txt,.md,.pdf,.json,.csv,.log,.xml,.yaml,.yml,.html,.css,.js,.ts,.py,.sh,.sql,.png,.jpg,.jpeg,.gif,.webp,.svg,.zip',
+};
+
+export async function getSettings(db: DrizzleD1Database): Promise<AppSettings> {
+  try {
+    const rows = await db.select().from(settings);
+    const map: Record<string, string> = {};
+    for (const row of rows) {
+      map[row.key] = row.value;
+    }
+    return {
+      rate_limit_per_minute: parseInt(map.rate_limit_per_minute, 10) || DEFAULT_SETTINGS.rate_limit_per_minute,
+      rate_limit_per_hour: parseInt(map.rate_limit_per_hour, 10) || DEFAULT_SETTINGS.rate_limit_per_hour,
+      rate_limit_per_day: parseInt(map.rate_limit_per_day, 10) || DEFAULT_SETTINGS.rate_limit_per_day,
+      max_file_size_mb: parseInt(map.max_file_size_mb, 10) || DEFAULT_SETTINGS.max_file_size_mb,
+      allowed_file_types: map.allowed_file_types ?? DEFAULT_SETTINGS.allowed_file_types,
+    };
+  } catch {
+    // Table might not exist yet
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+export async function updateSetting(
+  db: DrizzleD1Database,
+  key: string,
+  value: string
+): Promise<void> {
+  const now = new Date().toISOString();
+  const existing = await db.select().from(settings).where(eq(settings.key, key));
+  if (existing.length > 0) {
+    await db.update(settings).set({ value, updated_at: now }).where(eq(settings.key, key));
+  } else {
+    await db.insert(settings).values({ key, value, updated_at: now });
+  }
 }
 
 // Rate limiting

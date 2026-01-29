@@ -36,6 +36,13 @@ export const blockedIps = sqliteTable('blocked_ips', {
   blocked_by: text('blocked_by').default('admin'),
 });
 
+export const settings = sqliteTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  updated_at: text('updated_at').notNull(),
+});
+
 export type Snippet = typeof snippets.$inferSelect;
 export type NewSnippet = typeof snippets.$inferInsert;
 export type BlockedIp = typeof blockedIps.$inferSelect;
+export type Setting = typeof settings.$inferSelect;

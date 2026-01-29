@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { createSnippet, checkRateLimit } from '@/lib/db';
+import { createSnippet, checkRateLimit, getSettings } from '@/lib/db';
 import { encryptContent } from '@/lib/encryption';
 import { getD1Db } from '@/lib/d1';
 import { blockedIps } from '@/lib/schema';
@@ -10,8 +10,8 @@ import { eq } from 'drizzle-orm';
 export async function POST(request: NextRequest) {
   try {
     const db = await getD1Db();
+    const cfg = await getSettings(db);
 
-    // Rate limiting: 10 creates per minute per IP
     const ip = request.headers.get('cf-connecting-ip') ||
                request.headers.get('x-forwarded-for') ||
                'unknown';
@@ -29,10 +29,29 @@ export async function POST(request: NextRequest) {
       // blocked_ips table might not exist yet, ignore
     }
 
-    const allowed = await checkRateLimit(db, ip, 'create', 10, 60000);
-    if (!allowed) {
+    // Rate limit: per minute
+    const minuteAllowed = await checkRateLimit(db, ip, 'create', cfg.rate_limit_per_minute, 60000);
+    if (!minuteAllowed) {
       return NextResponse.json(
-        { error: 'Too many requests. Please try again later.' },
+        { error: `Too many requests. Max ${cfg.rate_limit_per_minute} per minute.` },
+        { status: 429 }
+      );
+    }
+
+    // Rate limit: per hour
+    const hourAllowed = await checkRateLimit(db, ip, 'create_hour', cfg.rate_limit_per_hour, 60 * 60 * 1000);
+    if (!hourAllowed) {
+      return NextResponse.json(
+        { error: `Rate limit exceeded. Max ${cfg.rate_limit_per_hour} per hour.` },
+        { status: 429 }
+      );
+    }
+
+    // Rate limit: per day
+    const dayAllowed = await checkRateLimit(db, ip, 'create_daily', cfg.rate_limit_per_day, 24 * 60 * 60 * 1000);
+    if (!dayAllowed) {
+      return NextResponse.json(
+        { error: `Daily rate limit exceeded. Max ${cfg.rate_limit_per_day} per day.` },
         { status: 429 }
       );
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const LANGUAGES = [
@@ -19,14 +19,15 @@ const EXPIRATION_OPTIONS = [
   { label: 'Never', value: 0 },
 ];
 
-const ALLOWED_EXTENSIONS = [
+// Defaults (overridden by server settings)
+const DEFAULT_ALLOWED_EXTENSIONS = [
   '.txt', '.md', '.pdf', '.json', '.csv', '.log', '.xml', '.yaml', '.yml',
   '.html', '.css', '.js', '.ts', '.py', '.sh', '.sql',
   '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg',
   '.zip',
 ];
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const DEFAULT_MAX_FILE_SIZE_MB = 5;
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -37,6 +38,25 @@ function formatFileSize(bytes: number): string {
 export default function Home() {
   const router = useRouter();
   const [tab, setTab] = useState<'text' | 'file'>('text');
+
+  // Dynamic settings from server
+  const [maxFileSizeMb, setMaxFileSizeMb] = useState(DEFAULT_MAX_FILE_SIZE_MB);
+  const [allowedExtensions, setAllowedExtensions] = useState(DEFAULT_ALLOWED_EXTENSIONS);
+
+  useEffect(() => {
+    fetch('/api/settings/public')
+      .then(r => r.ok ? r.json() : null)
+      .then((raw) => {
+        const data = raw as { max_file_size_mb?: number; allowed_file_types?: string } | null;
+        if (data) {
+          if (data.max_file_size_mb) setMaxFileSizeMb(data.max_file_size_mb);
+          if (data.allowed_file_types) {
+            setAllowedExtensions(data.allowed_file_types.split(',').map((s: string) => s.trim()).filter(Boolean));
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Text state
   const [content, setContent] = useState('');
@@ -67,8 +87,9 @@ export default function Home() {
   }, []);
 
   const validateFile = (f: File): string | null => {
-    if (f.size > MAX_FILE_SIZE) {
-      return `File too large (${formatFileSize(f.size)}). Maximum is 5MB.`;
+    const maxBytes = maxFileSizeMb * 1024 * 1024;
+    if (f.size > maxBytes) {
+      return `File too large (${formatFileSize(f.size)}). Maximum is ${maxFileSizeMb}MB.`;
     }
     if (f.size === 0) {
       return 'File is empty.';
@@ -76,7 +97,7 @@ export default function Home() {
     const ext = f.name.lastIndexOf('.') >= 0
       ? f.name.substring(f.name.lastIndexOf('.')).toLowerCase()
       : '';
-    if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
+    if (!ext || !allowedExtensions.includes(ext)) {
       return `File type "${ext || 'unknown'}" is not allowed.`;
     }
     return null;
@@ -362,7 +383,7 @@ export default function Home() {
                 ref={fileInputRef}
                 type="file"
                 onChange={handleFileSelect}
-                accept={ALLOWED_EXTENSIONS.join(',')}
+                accept={allowedExtensions.join(',')}
                 className="hidden"
               />
 
@@ -390,7 +411,7 @@ export default function Home() {
                     Drop a file here or click to browse
                   </p>
                   <p className="text-slate-400 text-sm">
-                    Max 5MB · Text, code, images, PDF, ZIP
+                    Max {maxFileSizeMb}MB · Text, code, images, PDF, ZIP
                   </p>
                 </div>
               )}
