@@ -14,23 +14,59 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SnipShare - Share Text & Code Snippets",
-    template: "%s",
+    default: "SnipShare - Share Text & Code Snippets Securely",
+    template: "%s | SnipShare",
   },
-  description: "Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading features. No login required.",
-  keywords: ["paste", "pastebin", "code sharing", "text sharing", "snippet", "share code"],
+  description: "Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading features. No login required. Free and open source pastebin alternative.",
+  keywords: ["paste", "pastebin", "code sharing", "text sharing", "snippet", "share code", "pastebin alternative", "secure paste", "code snippet", "burn after read"],
   openGraph: {
-    title: "SnipShare - Share Text & Code Snippets",
-    description: "Share text and code snippets securely. No login required.",
+    title: "SnipShare - Share Text & Code Snippets Securely",
+    description: "Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading. No login required.",
     type: "website",
     siteName: "SnipShare",
+    url: "https://steveyu.au",
+    locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "SnipShare - Share Text & Code Snippets",
+    title: "SnipShare - Share Text & Code Snippets Securely",
     description: "Share text and code snippets securely. No login required.",
   },
-  metadataBase: new URL("https://snipshare.pages.dev"),
+  metadataBase: new URL("https://steveyu.au"),
+  alternates: {
+    canonical: "https://steveyu.au",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "SnipShare",
+  url: "https://steveyu.au",
+  description: "Share text and code snippets securely with password protection, auto-expiration, and burn-after-reading features.",
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Any",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  featureList: [
+    "Password-protected snippets",
+    "Auto-expiration",
+    "Burn after reading",
+    "Syntax highlighting for 26+ languages",
+    "QR code sharing",
+    "No login required",
+  ],
 };
 
 export default function RootLayout({
@@ -40,6 +76,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

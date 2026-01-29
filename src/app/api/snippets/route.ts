@@ -3,6 +3,8 @@ import { nanoid } from 'nanoid';
 import { createSnippet, checkRateLimit } from '@/lib/db';
 import { encryptContent } from '@/lib/encryption';
 import { getD1Db } from '@/lib/d1';
+import { blockedIps } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
 
 
 export async function POST(request: NextRequest) {
@@ -13,6 +15,19 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('cf-connecting-ip') ||
                request.headers.get('x-forwarded-for') ||
                'unknown';
+
+    // Check if IP is blocked
+    try {
+      const blocked = await db.select().from(blockedIps).where(eq(blockedIps.ip, ip));
+      if (blocked.length > 0) {
+        return NextResponse.json(
+          { error: 'Your IP has been blocked. Contact the administrator.' },
+          { status: 403 }
+        );
+      }
+    } catch {
+      // blocked_ips table might not exist yet, ignore
+    }
 
     const allowed = await checkRateLimit(db, ip, 'create', 10, 60000);
     if (!allowed) {

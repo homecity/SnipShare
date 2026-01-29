@@ -18,32 +18,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     if (!snippet) {
       return {
-        title: 'Snippet Not Found - SnipShare',
+        title: 'Snippet Not Found',
         description: 'This snippet does not exist or has expired.',
+        robots: { index: false },
       };
     }
 
     const title = snippet.title
-      ? `${snippet.title} - SnipShare`
-      : `${snippet.language} Snippet - SnipShare`;
+      ? `${snippet.title} - ${snippet.language} Snippet`
+      : `${snippet.language.charAt(0).toUpperCase() + snippet.language.slice(1)} Snippet`;
 
     const description = snippet.is_encrypted
-      ? 'This snippet is password protected. Enter the password to view.'
-      : `A ${snippet.language} snippet shared via SnipShare.`;
+      ? 'This snippet is password protected. Enter the password to view it on SnipShare.'
+      : `A ${snippet.language} code snippet shared via SnipShare. View count: ${snippet.view_count}.`;
+
+    const url = `https://steveyu.au/${id}`;
 
     return {
       title,
       description,
+      alternates: {
+        canonical: url,
+      },
       openGraph: {
         title,
         description,
         type: 'article',
         siteName: 'SnipShare',
+        url,
       },
       twitter: {
         card: 'summary',
         title,
         description,
+      },
+      robots: {
+        index: !snippet.burn_after_read && !snippet.is_encrypted,
+        follow: true,
       },
     };
   } catch {

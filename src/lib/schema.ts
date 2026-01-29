@@ -22,5 +22,14 @@ export const rateLimits = sqliteTable('rate_limits', {
   timestamp: integer('timestamp').notNull(),
 });
 
+export const blockedIps = sqliteTable('blocked_ips', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ip: text('ip').notNull(),
+  reason: text('reason'),
+  blocked_at: integer('blocked_at').notNull(),
+  blocked_by: text('blocked_by').default('admin'),
+});
+
 export type Snippet = typeof snippets.$inferSelect;
 export type NewSnippet = typeof snippets.$inferInsert;
+export type BlockedIp = typeof blockedIps.$inferSelect;
