@@ -1,11 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { createSnippet } from '@/lib/db';
+import { createSnippet, checkRateLimit } from '@/lib/db';
 import { encryptContent } from '@/lib/encryption';
+import { getD1Db } from '@/lib/d1';
+
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const db = await getD1Db();
+
+    // Rate limiting: 10 creates per minute per IP
+    const ip = request.headers.get('cf-connecting-ip') ||
+               request.headers.get('x-forwarded-for') ||
+               'unknown';
+
+    const allowed = await checkRateLimit(db, ip, 'create', 10, 60000);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json() as {
+      content?: string;
+      language?: string;
+      title?: string;
+      password?: string;
+      expiresIn?: number;
+      burnAfterRead?: boolean;
+    };
     const { content, language, title, password, expiresIn, burnAfterRead } = body;
 
     if (!content || typeof content !== 'string') {
@@ -23,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate expiration (max 2 weeks)
-    const maxExpiration = 14 * 24 * 60 * 60 * 1000; // 2 weeks in ms
+    const maxExpiration = 14 * 24 * 60 * 60 * 1000;
     if (expiresIn && expiresIn > maxExpiration) {
       return NextResponse.json(
         { error: 'Maximum expiration is 2 weeks' },
@@ -34,9 +59,9 @@ export async function POST(request: NextRequest) {
     const id = nanoid(10);
 
     // Encrypt content if password provided
-    const finalContent = password ? encryptContent(content, password) : content;
+    const finalContent = password ? await encryptContent(content, password) : content;
 
-    const snippet = createSnippet({
+    const snippet = await createSnippet(db, {
       id,
       content: finalContent,
       language: language || 'plaintext',

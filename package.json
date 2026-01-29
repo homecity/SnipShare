@@ -1,15 +1,20 @@
 {
-  "name": "text_app",
-  "version": "0.1.0",
+  "name": "snipshare",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "preview": "opennextjs-cloudflare build && wrangler dev",
+    "deploy": "opennextjs-cloudflare build && wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 execute snipshare-db --local --file=./drizzle/0000_init.sql",
+    "db:migrate:remote": "wrangler d1 execute snipshare-db --remote --file=./drizzle/0000_init.sql"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0",
+    "drizzle-orm": "^0.44.0",
     "highlight.js": "^11.11.1",
     "nanoid": "^5.1.6",
     "next": "16.1.4",
@@ -20,15 +25,18 @@
     "react-qrcode-logo": "^4.0.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250124.0",
+    "@opennextjs/cloudflare": "^1.16.1",
     "@tailwindcss/postcss": "^4",
-    "@types/crypto-js": "^4.2.2",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.30.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.0.0"
   }
 }

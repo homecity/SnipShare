@@ -1,48 +1,14 @@
-import fs from 'fs';
-import path from 'path';
+import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1';
+import { eq, and, lt } from 'drizzle-orm';
+import { snippets, rateLimits } from './schema';
+import type { Snippet } from './schema';
+import { hashPassword, verifyPasswordHash } from './encryption';
 
-const dataDir = path.join(process.cwd(), 'data');
-const dbPath = path.join(dataDir, 'snippets.json');
+export type { Snippet };
 
-// Ensure data directory exists
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
-// Initialize database file if it doesn't exist
-if (!fs.existsSync(dbPath)) {
-  fs.writeFileSync(dbPath, JSON.stringify({ snippets: [] }, null, 2));
-}
-
-export interface Snippet {
-  id: string;
-  content: string;
-  language: string;
-  title: string | null;
-  password_hash: string | null;
-  is_encrypted: boolean;
-  expires_at: number | null;
-  burn_after_read: boolean;
-  view_count: number;
-  created_at: number;
-  is_deleted: boolean;
-}
-
-interface Database {
-  snippets: Snippet[];
-}
-
-function readDb(): Database {
-  try {
-    const data = fs.readFileSync(dbPath, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return { snippets: [] };
-  }
-}
-
-function writeDb(db: Database): void {
-  fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+// Get D1 database from Cloudflare env
+export function getDb(env: { DB: D1Database }): DrizzleD1Database {
+  return drizzle(env.DB);
 }
 
 export interface CreateSnippetInput {
@@ -55,14 +21,11 @@ export interface CreateSnippetInput {
   burnAfterRead?: boolean;
 }
 
-// Simple password hashing (using crypto)
-function hashPassword(password: string): string {
-  const crypto = require('crypto');
-  return crypto.createHash('sha256').update(password).digest('hex');
-}
-
 // Create a new snippet
-export function createSnippet(input: CreateSnippetInput): Snippet {
+export async function createSnippet(
+  db: DrizzleD1Database,
+  input: CreateSnippetInput
+): Promise<Snippet> {
   const {
     id,
     content,
@@ -74,14 +37,23 @@ export function createSnippet(input: CreateSnippetInput): Snippet {
   } = input;
 
   const expiresAt = expiresIn ? Date.now() + expiresIn : null;
-  const passwordHash = password ? hashPassword(password) : null;
 
-  const snippet: Snippet = {
+  let passwordHash: string | null = null;
+  let passwordSalt: string | null = null;
+
+  if (password) {
+    const result = await hashPassword(password);
+    passwordHash = result.hash;
+    passwordSalt = result.salt;
+  }
+
+  const snippet = {
     id,
     content,
     language,
     title: title || null,
     password_hash: passwordHash,
+    password_salt: passwordSalt,
     is_encrypted: !!password,
     expires_at: expiresAt,
     burn_after_read: burnAfterRead,
@@ -90,23 +62,27 @@ export function createSnippet(input: CreateSnippetInput): Snippet {
     is_deleted: false,
   };
 
-  const db = readDb();
-  db.snippets.push(snippet);
-  writeDb(db);
+  await db.insert(snippets).values(snippet);
 
-  return snippet;
+  return snippet as Snippet;
 }
 
 // Get snippet by ID
-export function getSnippetById(id: string): Snippet | null {
-  const db = readDb();
-  const snippet = db.snippets.find(s => s.id === id && !s.is_deleted);
+export async function getSnippetById(
+  db: DrizzleD1Database,
+  id: string
+): Promise<Snippet | null> {
+  const results = await db
+    .select()
+    .from(snippets)
+    .where(and(eq(snippets.id, id), eq(snippets.is_deleted, false)));
 
+  const snippet = results[0] || null;
   if (!snippet) return null;
 
   // Check if expired
   if (snippet.expires_at && snippet.expires_at < Date.now()) {
-    markAsDeleted(id);
+    await markAsDeleted(db, id);
     return null;
   }
 
@@ -114,46 +90,94 @@ export function getSnippetById(id: string): Snippet | null {
 }
 
 // Increment view count
-export function incrementViewCount(id: string): void {
-  const db = readDb();
-  const snippet = db.snippets.find(s => s.id === id);
+export async function incrementViewCount(
+  db: DrizzleD1Database,
+  id: string
+): Promise<void> {
+  const results = await db.select().from(snippets).where(eq(snippets.id, id));
+  const snippet = results[0];
   if (snippet) {
-    snippet.view_count += 1;
-    writeDb(db);
+    await db
+      .update(snippets)
+      .set({ view_count: snippet.view_count + 1 })
+      .where(eq(snippets.id, id));
   }
 }
 
 // Mark snippet as deleted
-export function markAsDeleted(id: string): void {
-  const db = readDb();
-  const snippet = db.snippets.find(s => s.id === id);
-  if (snippet) {
-    snippet.is_deleted = true;
-    writeDb(db);
-  }
+export async function markAsDeleted(
+  db: DrizzleD1Database,
+  id: string
+): Promise<void> {
+  await db
+    .update(snippets)
+    .set({ is_deleted: true })
+    .where(eq(snippets.id, id));
 }
 
 // Verify password
-export function verifyPassword(snippet: Snippet, password: string): boolean {
-  if (!snippet.password_hash) return true;
-  return hashPassword(password) === snippet.password_hash;
+export async function verifyPassword(
+  snippet: Snippet,
+  password: string
+): Promise<boolean> {
+  if (!snippet.password_hash || !snippet.password_salt) return true;
+  return verifyPasswordHash(password, snippet.password_hash, snippet.password_salt);
 }
 
-// Clean up expired snippets (can be called periodically)
-export function cleanupExpiredSnippets(): number {
-  const db = readDb();
-  let count = 0;
+// Clean up expired snippets
+export async function cleanupExpiredSnippets(
+  db: DrizzleD1Database
+): Promise<number> {
+  const now = Date.now();
+  const result = await db
+    .update(snippets)
+    .set({ is_deleted: true })
+    .where(
+      and(
+        eq(snippets.is_deleted, false),
+        lt(snippets.expires_at, now)
+      )
+    );
 
-  db.snippets.forEach(snippet => {
-    if (snippet.expires_at && snippet.expires_at < Date.now() && !snippet.is_deleted) {
-      snippet.is_deleted = true;
-      count++;
-    }
-  });
+  return result.meta?.changes ?? 0;
+}
 
-  if (count > 0) {
-    writeDb(db);
+// Rate limiting
+export async function checkRateLimit(
+  db: DrizzleD1Database,
+  ip: string,
+  action: string,
+  maxRequests: number = 10,
+  windowMs: number = 60000
+): Promise<boolean> {
+  const windowStart = Date.now() - windowMs;
+
+  // Clean old entries
+  await db
+    .delete(rateLimits)
+    .where(lt(rateLimits.timestamp, windowStart));
+
+  // Count recent requests
+  const results = await db
+    .select()
+    .from(rateLimits)
+    .where(
+      and(
+        eq(rateLimits.ip, ip),
+        eq(rateLimits.action, action)
+      )
+    );
+
+  if (results.length >= maxRequests) {
+    return false; // Rate limited
   }
 
-  return count;
+  // Record this request
+  await db.insert(rateLimits).values({
+    ip,
+    action,
+    timestamp: Date.now(),
+  });
+
+  return true; // Allowed
 }
