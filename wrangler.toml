@@ -6,5 +6,5 @@ pages_build_output_dir = ".open-next"
 [[d1_databases]]
 binding = "DB"
 database_name = "snipshare-db"
-database_id = "YOUR_D1_DATABASE_ID"
+database_id = "21b1c578-09fa-48da-b975-5f163018162c"
 migrations_dir = "drizzle"
