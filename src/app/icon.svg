@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#EC4899"/>
+    </linearGradient>
+    <linearGradient id="lock" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0ABFC"/>
+      <stop offset="100%" style="stop-color:#C084FC"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  
+  <!-- Clipboard body -->
+  <rect x="120" y="100" width="272" height="330" rx="24" fill="white" opacity="0.95"/>
+  
+  <!-- Clipboard clip (top) -->
+  <rect x="186" y="72" width="140" height="56" rx="12" fill="white"/>
+  <rect x="210" y="60" width="92" height="36" rx="18" fill="url(#bg)"/>
+  <circle cx="256" cy="78" r="8" fill="white"/>
+  
+  <!-- Text lines on clipboard -->
+  <rect x="160" y="168" width="192" height="12" rx="6" fill="#C4B5FD" opacity="0.7"/>
+  <rect x="160" y="196" width="152" height="12" rx="6" fill="#C4B5FD" opacity="0.5"/>
+  <rect x="160" y="224" width="172" height="12" rx="6" fill="#C4B5FD" opacity="0.4"/>
+  
+  <!-- Lock icon (bottom right of clipboard) -->
+  <g transform="translate(280, 280)">
+    <!-- Lock background circle -->
+    <circle cx="52" cy="52" r="60" fill="url(#bg)" stroke="white" stroke-width="6"/>
+    
+    <!-- Lock shackle -->
+    <path d="M32 48 V34 C32 20 72 20 72 34 V48" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    
+    <!-- Lock body -->
+    <rect x="24" y="46" width="56" height="40" rx="8" fill="white"/>
+    
+    <!-- Keyhole -->
+    <circle cx="52" cy="62" r="7" fill="url(#bg)"/>
+    <rect x="49" y="62" width="6" height="14" rx="3" fill="url(#bg)"/>
+  </g>
+</svg>
