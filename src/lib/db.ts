@@ -19,6 +19,12 @@ export interface CreateSnippetInput {
   password?: string;
   expiresIn?: number; // milliseconds
   burnAfterRead?: boolean;
+  // File upload fields
+  type?: 'text' | 'file';
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  r2Key?: string;
 }
 
 // Create a new snippet
@@ -34,6 +40,11 @@ export async function createSnippet(
     password,
     expiresIn,
     burnAfterRead = false,
+    type = 'text',
+    fileName,
+    fileSize,
+    fileType,
+    r2Key,
   } = input;
 
   const expiresAt = expiresIn ? Date.now() + expiresIn : null;
@@ -60,6 +71,11 @@ export async function createSnippet(
     view_count: 0,
     created_at: Math.floor(Date.now() / 1000),
     is_deleted: false,
+    type,
+    file_name: fileName || null,
+    file_size: fileSize || null,
+    file_type: fileType || null,
+    r2_key: r2Key || null,
   };
 
   await db.insert(snippets).values(snippet);
@@ -122,6 +138,27 @@ export async function verifyPassword(
 ): Promise<boolean> {
   if (!snippet.password_hash || !snippet.password_salt) return true;
   return verifyPasswordHash(password, snippet.password_hash, snippet.password_salt);
+}
+
+// Get expired snippets that need cleanup (returns R2 keys for file deletion)
+export async function getExpiredFileKeys(
+  db: DrizzleD1Database
+): Promise<string[]> {
+  const now = Date.now();
+  const results = await db
+    .select({ r2_key: snippets.r2_key })
+    .from(snippets)
+    .where(
+      and(
+        eq(snippets.is_deleted, false),
+        eq(snippets.type, 'file'),
+        lt(snippets.expires_at, now)
+      )
+    );
+
+  return results
+    .map(r => r.r2_key)
+    .filter((key): key is string => key !== null);
 }
 
 // Clean up expired snippets

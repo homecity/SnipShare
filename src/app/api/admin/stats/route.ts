@@ -56,6 +56,23 @@ export async function GET() {
       .where(and(eq(snippets.burn_after_read, true), eq(snippets.is_deleted, false)));
     const burnSnippets = burnResult[0]?.count || 0;
 
+    // File snippets count
+    const fileResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(snippets)
+      .where(and(eq(snippets.type, 'file'), eq(snippets.is_deleted, false)));
+    const fileSnippets = fileResult[0]?.count || 0;
+
+    // Text snippets count
+    const textSnippets = activeSnippets - fileSnippets;
+
+    // Total file size
+    const fileSizeResult = await db
+      .select({ total: sql<number>`COALESCE(SUM(file_size), 0)` })
+      .from(snippets)
+      .where(and(eq(snippets.type, 'file'), eq(snippets.is_deleted, false)));
+    const totalFileSize = fileSizeResult[0]?.total || 0;
+
     return NextResponse.json({
       totalSnippets,
       activeSnippets,
@@ -64,6 +81,9 @@ export async function GET() {
       encryptedSnippets,
       burnSnippets,
       rateLimitEntries,
+      fileSnippets,
+      textSnippets,
+      totalFileSize,
     });
   } catch (error) {
     console.error('Admin stats error:', error);

@@ -13,6 +13,12 @@ export const snippets = sqliteTable('snippets', {
   view_count: integer('view_count').notNull().default(0),
   created_at: integer('created_at').notNull(),
   is_deleted: integer('is_deleted', { mode: 'boolean' }).notNull().default(false),
+  // File upload fields
+  type: text('type').default('text'), // 'text' | 'file'
+  file_name: text('file_name'),
+  file_size: integer('file_size'),
+  file_type: text('file_type'),
+  r2_key: text('r2_key'),
 });
 
 export const rateLimits = sqliteTable('rate_limits', {

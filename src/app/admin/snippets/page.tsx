@@ -13,6 +13,9 @@ interface SnippetItem {
   isEncrypted: boolean;
   burnAfterRead: boolean;
   isDeleted: boolean;
+  type: string;
+  fileName: string | null;
+  fileSize: number | null;
 }
 
 interface SnippetResponse {
@@ -137,6 +140,7 @@ export default function AdminSnippets() {
                   <thead>
                     <tr className="border-b border-slate-700/50 text-slate-400">
                       <th className="text-left px-4 py-3 font-medium">ID</th>
+                      <th className="text-left px-4 py-3 font-medium">Type</th>
                       <th className="text-left px-4 py-3 font-medium">Title</th>
                       <th className="text-left px-4 py-3 font-medium">Language</th>
                       <th className="text-left px-4 py-3 font-medium">Created</th>
@@ -161,8 +165,15 @@ export default function AdminSnippets() {
                               {snippet.id}
                             </a>
                           </td>
+                          <td className="px-4 py-3">
+                            {snippet.type === 'file' ? (
+                              <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-300 rounded text-xs">📁 File</span>
+                            ) : (
+                              <span className="px-2 py-0.5 bg-slate-600/30 text-slate-300 rounded text-xs">📝 Text</span>
+                            )}
+                          </td>
                           <td className="px-4 py-3 text-white max-w-[200px] truncate">
-                            {snippet.title || <span className="text-slate-500">Untitled</span>}
+                            {snippet.title || snippet.fileName || <span className="text-slate-500">Untitled</span>}
                           </td>
                           <td className="px-4 py-3 text-slate-300">{snippet.language}</td>
                           <td className="px-4 py-3 text-slate-400 whitespace-nowrap">

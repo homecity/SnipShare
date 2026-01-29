@@ -11,6 +11,9 @@ interface Stats {
   encryptedSnippets: number;
   burnSnippets: number;
   rateLimitEntries: number;
+  fileSnippets: number;
+  textSnippets: number;
+  totalFileSize: number;
 }
 
 export default function AdminSettings() {
@@ -24,17 +27,20 @@ export default function AdminSettings() {
   }, []);
 
   const RATE_LIMIT_CONFIG = [
-    { name: 'Create Snippet', limit: '10 requests', window: '1 minute', scope: 'Per IP' },
+    { name: 'Create Snippet / Upload', limit: '20 requests', window: '1 hour', scope: 'Per IP' },
+    { name: 'Daily Limit', limit: '100 requests', window: '24 hours', scope: 'Per IP' },
   ];
 
   const SERVICE_CONFIG = [
-    { name: 'Max Content Size', value: '500 KB' },
+    { name: 'Max Text Content Size', value: '500 KB' },
+    { name: 'Max File Upload Size', value: '5 MB' },
     { name: 'Max Expiration', value: '2 weeks' },
     { name: 'Default Expiration', value: '3 days' },
     { name: 'Snippet ID Length', value: '10 characters (nanoid)' },
     { name: 'Encryption', value: 'AES-256-GCM via Web Crypto API' },
     { name: 'Password Hashing', value: 'PBKDF2 (100,000 iterations, SHA-256)' },
     { name: 'Database', value: 'Cloudflare D1 (SQLite)' },
+    { name: 'File Storage', value: 'Cloudflare R2' },
     { name: 'Runtime', value: 'Cloudflare Workers (OpenNext)' },
     { name: 'Domain', value: 'steveyu.au' },
   ];

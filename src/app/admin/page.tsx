@@ -11,6 +11,9 @@ interface Stats {
   encryptedSnippets: number;
   burnSnippets: number;
   rateLimitEntries: number;
+  fileSnippets: number;
+  textSnippets: number;
+  totalFileSize: number;
 }
 
 export default function AdminDashboard() {
@@ -75,12 +78,18 @@ export default function AdminDashboard() {
             </div>
 
             {/* Secondary Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatCard
-                title="Deleted Snippets"
-                value={stats.deletedSnippets}
-                icon="🗑️"
-                color="red"
+                title="Text Snippets"
+                value={stats.textSnippets}
+                icon="📝"
+                color="blue"
+              />
+              <StatCard
+                title="File Uploads"
+                value={stats.fileSnippets}
+                icon="📁"
+                color="green"
               />
               <StatCard
                 title="Encrypted"
@@ -94,6 +103,27 @@ export default function AdminDashboard() {
                 icon="🔥"
                 color="orange"
               />
+            </div>
+
+            {/* Tertiary Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <StatCard
+                title="Deleted Snippets"
+                value={stats.deletedSnippets}
+                icon="🗑️"
+                color="red"
+              />
+              <div className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-2xl">💾</span>
+                </div>
+                <div className="text-3xl font-bold text-white mb-1">
+                  {stats.totalFileSize < 1024 * 1024
+                    ? `${(stats.totalFileSize / 1024).toFixed(1)} KB`
+                    : `${(stats.totalFileSize / (1024 * 1024)).toFixed(2)} MB`}
+                </div>
+                <div className="text-sm text-slate-400">Total File Storage</div>
+              </div>
             </div>
 
             {/* Quick Info */}

@@ -59,6 +59,9 @@ export async function GET(request: NextRequest) {
         isEncrypted: s.is_encrypted,
         burnAfterRead: s.burn_after_read,
         isDeleted: s.is_deleted,
+        type: s.type || 'text',
+        fileName: s.file_name,
+        fileSize: s.file_size,
       })),
       total,
       page,
@@ -85,6 +88,20 @@ export async function DELETE(request: NextRequest) {
     }
 
     const db = await getD1Db();
+
+    // If it's a file snippet, also delete from R2
+    const results = await db.select().from(snippets).where(eq(snippets.id, id));
+    const snippet = results[0];
+    if (snippet?.type === 'file' && snippet.r2_key) {
+      try {
+        const { getR2Bucket } = await import('@/lib/d1');
+        const r2 = await getR2Bucket();
+        await r2.delete(snippet.r2_key);
+      } catch (e) {
+        console.error('Failed to delete from R2:', e);
+      }
+    }
+
     await db.update(snippets).set({ is_deleted: true }).where(eq(snippets.id, id));
 
     return NextResponse.json({ success: true });
