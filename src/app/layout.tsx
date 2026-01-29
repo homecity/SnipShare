@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title: "SnipShare - Share Text & Code Snippets",
     description: "Share text and code snippets securely. No login required.",
   },
-  metadataBase: new URL("https://snipshare.pages.dev"),
+  metadataBase: new URL("https://steveyu.au"),
 };
 
 export default function RootLayout({

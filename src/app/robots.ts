@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/'],
     },
-    sitemap: 'https://snipshare.pages.dev/sitemap.xml',
+    sitemap: 'https://steveyu.au/sitemap.xml',
   };
 }
