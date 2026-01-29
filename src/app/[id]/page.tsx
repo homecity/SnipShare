@@ -4,7 +4,6 @@ import SnippetClient from './SnippetClient';
 import { getSnippetById, incrementViewCount, markAsDeleted } from '@/lib/db';
 import { getD1Db } from '@/lib/d1';
 
-export const runtime = 'edge';
 
 interface PageProps {
   params: Promise<{ id: string }>;

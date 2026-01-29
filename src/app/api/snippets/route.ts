@@ -4,7 +4,6 @@ import { createSnippet, checkRateLimit } from '@/lib/db';
 import { encryptContent } from '@/lib/encryption';
 import { getD1Db } from '@/lib/d1';
 
-export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {

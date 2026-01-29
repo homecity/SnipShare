@@ -8,7 +8,6 @@ import {
 import { decryptContent } from '@/lib/encryption';
 import { getD1Db } from '@/lib/d1';
 
-export const runtime = 'edge';
 
 export async function GET(
   request: NextRequest,
