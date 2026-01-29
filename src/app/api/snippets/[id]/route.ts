@@ -5,7 +5,7 @@ import {
   markAsDeleted,
   verifyPassword,
 } from '@/lib/db';
-import { decryptContent } from '@/lib/encryption';
+import { decryptContent, decryptWithKey, base64ToArrayBuffer } from '@/lib/encryption';
 import { getD1Db } from '@/lib/d1';
 
 
@@ -47,9 +47,25 @@ export async function GET(
       await markAsDeleted(db, id);
     }
 
+    // Decrypt server-side encryption if encryption_key exists
+    let content = snippet.content;
+    if (snippet.encryption_key) {
+      try {
+        const encryptedBuffer = base64ToArrayBuffer(content);
+        const decryptedBuffer = await decryptWithKey(encryptedBuffer, snippet.encryption_key);
+        content = new TextDecoder().decode(decryptedBuffer);
+      } catch (e) {
+        console.error('Failed to decrypt content with encryption key:', e);
+        return NextResponse.json(
+          { error: 'Failed to decrypt content' },
+          { status: 500 }
+        );
+      }
+    }
+
     return NextResponse.json({
       id: snippet.id,
-      content: snippet.content,
+      content,
       language: snippet.language,
       title: snippet.title,
       viewCount: snippet.view_count + 1,
@@ -102,13 +118,29 @@ export async function POST(
       );
     }
 
-    // Decrypt content
+    // Decrypt password encryption first
     const decryptedContent = await decryptContent(snippet.content, password);
     if (!decryptedContent) {
       return NextResponse.json(
         { error: 'Failed to decrypt content' },
         { status: 500 }
       );
+    }
+
+    // Then decrypt server-side encryption if encryption_key exists
+    let finalContent = decryptedContent;
+    if (snippet.encryption_key) {
+      try {
+        const encryptedBuffer = base64ToArrayBuffer(decryptedContent);
+        const decryptedBuffer = await decryptWithKey(encryptedBuffer, snippet.encryption_key);
+        finalContent = new TextDecoder().decode(decryptedBuffer);
+      } catch (e) {
+        console.error('Failed to decrypt content with encryption key:', e);
+        return NextResponse.json(
+          { error: 'Failed to decrypt content' },
+          { status: 500 }
+        );
+      }
     }
 
     // Increment view count
@@ -121,7 +153,7 @@ export async function POST(
 
     return NextResponse.json({
       id: snippet.id,
-      content: decryptedContent,
+      content: finalContent,
       language: snippet.language,
       title: snippet.title,
       viewCount: snippet.view_count + 1,
