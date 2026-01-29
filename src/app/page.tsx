@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { DEFAULT_ALLOWED_EXTENSIONS as SHARED_ALLOWED_EXTENSIONS } from '@/lib/constants';
 
 const LANGUAGES = [
   'plaintext', 'javascript', 'typescript', 'python', 'java', 'c', 'cpp', 'csharp',
@@ -20,12 +21,7 @@ const EXPIRATION_OPTIONS = [
 ];
 
 // Defaults (overridden by server settings)
-const DEFAULT_ALLOWED_EXTENSIONS = [
-  '.txt', '.md', '.pdf', '.json', '.csv', '.log', '.xml', '.yaml', '.yml',
-  '.html', '.css', '.js', '.ts', '.py', '.sh', '.sql',
-  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg',
-  '.zip',
-];
+const DEFAULT_ALLOWED_EXTENSIONS = SHARED_ALLOWED_EXTENSIONS;
 
 const DEFAULT_MAX_FILE_SIZE_MB = 5;
 

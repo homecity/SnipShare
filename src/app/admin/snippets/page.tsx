@@ -82,6 +82,13 @@ export default function AdminSnippets() {
     return new Date(ts * 1000).toLocaleString();
   };
 
+  const formatFileSize = (bytes: number | null): string => {
+    if (bytes === null || bytes === undefined) return '-';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
   const getExpiryStatus = (expiresAt: number | null) => {
     if (!expiresAt) return { text: 'Never', class: 'text-slate-400' };
     const remaining = expiresAt - Date.now();
@@ -146,6 +153,7 @@ export default function AdminSnippets() {
                       <th className="text-left px-4 py-3 font-medium">Created</th>
                       <th className="text-left px-4 py-3 font-medium">Expires</th>
                       <th className="text-left px-4 py-3 font-medium">Views</th>
+                      <th className="text-left px-4 py-3 font-medium">Size</th>
                       <th className="text-left px-4 py-3 font-medium">Status</th>
                       <th className="text-left px-4 py-3 font-medium">Actions</th>
                     </tr>
@@ -181,6 +189,9 @@ export default function AdminSnippets() {
                           </td>
                           <td className={`px-4 py-3 ${expiry.class}`}>{expiry.text}</td>
                           <td className="px-4 py-3 text-slate-300">{snippet.viewCount}</td>
+                          <td className="px-4 py-3 text-slate-300 whitespace-nowrap">
+                            {snippet.type === 'file' ? formatFileSize(snippet.fileSize) : '-'}
+                          </td>
                           <td className="px-4 py-3">
                             <div className="flex gap-1 flex-wrap">
                               {snippet.isDeleted && (

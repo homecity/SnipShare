@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import QRCodeModal from '@/components/QRCodeModal';
 
 interface FileData {
   id: string;
@@ -61,6 +62,7 @@ export default function FileClient({ initialData }: FileClientProps) {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [unlocked, setUnlocked] = useState(!initialData.requiresPassword);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleString();
@@ -269,13 +271,25 @@ export default function FileClient({ initialData }: FileClientProps) {
             </span>
           </Link>
 
-          <button
-            onClick={() => copyToClipboard(shareUrl)}
-            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition"
-          >
-            {copiedUrl ? '✓ Copied!' : '🔗 Copy URL'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowQR(true)}
+              className="px-4 py-2 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 text-slate-300 rounded-lg transition"
+              title="Show QR Code"
+            >
+              📱 QR
+            </button>
+            <button
+              onClick={() => copyToClipboard(shareUrl)}
+              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition"
+            >
+              {copiedUrl ? '✓ Copied!' : '🔗 Copy URL'}
+            </button>
+          </div>
         </div>
+
+        {/* QR Code Modal */}
+        <QRCodeModal url={shareUrl} show={showQR} onClose={() => setShowQR(false)} />
 
         {/* File Info Card */}
         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 mb-6">

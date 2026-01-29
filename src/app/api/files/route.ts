@@ -5,32 +5,7 @@ import { encryptBuffer } from '@/lib/encryption';
 import { getD1Db, getR2Bucket } from '@/lib/d1';
 import { blockedIps } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
-
-const EXTENSION_TO_MIME: Record<string, string> = {
-  '.txt': 'text/plain',
-  '.md': 'text/markdown',
-  '.pdf': 'application/pdf',
-  '.json': 'application/json',
-  '.csv': 'text/csv',
-  '.log': 'text/plain',
-  '.xml': 'application/xml',
-  '.yaml': 'text/yaml',
-  '.yml': 'text/yaml',
-  '.html': 'text/html',
-  '.css': 'text/css',
-  '.js': 'application/javascript',
-  '.ts': 'application/typescript',
-  '.py': 'text/x-python',
-  '.sh': 'application/x-sh',
-  '.sql': 'application/sql',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-  '.svg': 'image/svg+xml',
-  '.zip': 'application/zip',
-};
+import { EXTENSION_TO_MIME } from '@/lib/constants';
 
 function getFileExtension(filename: string): string {
   const lastDot = filename.lastIndexOf('.');

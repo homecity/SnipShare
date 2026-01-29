@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { QRCodeCanvas } from 'qrcode.react';
+import QRCodeModal from '@/components/QRCodeModal';
 
 interface SnippetData {
   id: string;
@@ -240,17 +240,7 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
         </div>
 
         {/* QR Code Modal */}
-        {showQR && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setShowQR(false)}>
-            <div className="bg-slate-800 p-6 rounded-xl" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-white text-lg font-semibold mb-4 text-center">Scan to Share</h3>
-              <div className="bg-white p-4 rounded-lg">
-                <QRCodeCanvas value={shareUrl} size={200} />
-              </div>
-              <p className="text-slate-400 text-sm mt-4 text-center max-w-xs break-all">{shareUrl}</p>
-            </div>
-          </div>
-        )}
+        <QRCodeModal url={shareUrl} show={showQR} onClose={() => setShowQR(false)} />
 
         {/* Snippet Info */}
         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 mb-6">
