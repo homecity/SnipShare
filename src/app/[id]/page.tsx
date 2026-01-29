@@ -4,6 +4,7 @@ import SnippetClient from './SnippetClient';
 import FileClient from './FileClient';
 import { getSnippetById, incrementViewCount, markAsDeleted } from '@/lib/db';
 import { getD1Db } from '@/lib/d1';
+import { decryptWithKey, base64ToArrayBuffer } from '@/lib/encryption';
 
 
 interface PageProps {
@@ -136,11 +137,25 @@ export default async function SnippetPage({ params }: PageProps) {
       await markAsDeleted(db, id);
     }
 
+    // Decrypt server-side encryption if encryption_key exists
+    let content = snippet.content;
+    if (snippet.encryption_key) {
+      try {
+        const encryptedBuffer = base64ToArrayBuffer(content);
+        const decryptedBuffer = await decryptWithKey(encryptedBuffer, snippet.encryption_key);
+        content = new TextDecoder().decode(decryptedBuffer);
+      } catch (e) {
+        console.error('Failed to decrypt content with encryption key:', e);
+        // Fall back to raw content for legacy compatibility
+        content = snippet.content;
+      }
+    }
+
     return (
       <SnippetClient
         initialData={{
           id: snippet.id,
-          content: snippet.content,
+          content,
           language: snippet.language,
           title: snippet.title,
           viewCount: snippet.view_count + 1,

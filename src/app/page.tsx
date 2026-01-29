@@ -238,6 +238,15 @@ export default function Home() {
           <p className="text-slate-400">Share text, code, and files securely</p>
         </header>
 
+        {/* Security Banner */}
+        <div className="mb-6 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-3">
+          <span className="text-xl shrink-0">🛡️</span>
+          <p className="text-emerald-300 text-sm">
+            <span className="font-semibold">Encrypted at rest.</span>{' '}
+            All snippets and files are securely encrypted before storage — even administrators cannot access your data.
+          </p>
+        </div>
+
         {/* Tabs */}
         <div className="flex justify-center mb-6">
           <div className="inline-flex bg-slate-800/50 border border-slate-700 rounded-lg p-1">
@@ -482,16 +491,21 @@ export default function Home() {
         )}
 
         {/* Features */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-5 gap-6">
           <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
             <div className="text-3xl mb-3">📁</div>
             <h3 className="text-white font-semibold mb-2">File Sharing</h3>
             <p className="text-slate-400 text-sm">Upload and share files up to 5MB securely</p>
           </div>
+          <div className="p-6 bg-emerald-900/20 border border-emerald-700/30 rounded-xl">
+            <div className="text-3xl mb-3">🔐</div>
+            <h3 className="text-white font-semibold mb-2">Encrypted Storage</h3>
+            <p className="text-slate-400 text-sm">All content is AES-256 encrypted at rest by default — zero access for anyone but you</p>
+          </div>
           <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
             <div className="text-3xl mb-3">🔒</div>
             <h3 className="text-white font-semibold mb-2">Password Protection</h3>
-            <p className="text-slate-400 text-sm">Encrypt your snippets and files with a password</p>
+            <p className="text-slate-400 text-sm">Add an extra layer of password encryption on top</p>
           </div>
           <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
             <div className="text-3xl mb-3">⏰</div>

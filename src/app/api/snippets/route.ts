@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { createSnippet, checkRateLimit, getSettings } from '@/lib/db';
-import { encryptContent } from '@/lib/encryption';
+import { encryptContent, generateEncryptionKey, encryptWithKey, arrayBufferToBase64 } from '@/lib/encryption';
 import { getD1Db } from '@/lib/d1';
 import { blockedIps } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
@@ -91,8 +91,14 @@ export async function POST(request: NextRequest) {
 
     const id = nanoid(10);
 
-    // Encrypt content if password provided
-    const finalContent = password ? await encryptContent(content, password) : content;
+    // Server-side encryption: always encrypt content with a random AES-256 key
+    const encryptionKey = await generateEncryptionKey();
+    const contentBuffer = new TextEncoder().encode(content);
+    const encryptedBuffer = await encryptWithKey(contentBuffer.buffer as ArrayBuffer, encryptionKey);
+    const encryptedBase64 = arrayBufferToBase64(encryptedBuffer);
+
+    // If password provided, additionally encrypt with password (double encryption)
+    const finalContent = password ? await encryptContent(encryptedBase64, password) : encryptedBase64;
 
     const snippet = await createSnippet(db, {
       id,
@@ -102,6 +108,7 @@ export async function POST(request: NextRequest) {
       password,
       expiresIn,
       burnAfterRead: burnAfterRead || false,
+      encryptionKey,
     });
 
     return NextResponse.json({
