@@ -19,9 +19,13 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Build and Deploy
-        run: npx opennextjs-cloudflare deploy
+      - name: Build
+        run: npx opennextjs-cloudflare build
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Deploy
+        run: npx opennextjs-cloudflare deploy
+        env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
