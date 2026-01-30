@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import QRCodeModal from '@/components/QRCodeModal';
 import SharePanel from '@/components/SharePanel';
 import ThemeToggle from '@/components/ThemeToggle';
+import EmbedModal from '@/components/EmbedModal';
 
 interface SnippetData {
   id: string;
@@ -26,6 +27,7 @@ interface SnippetClientProps {
 
 export default function SnippetClient({ initialData }: SnippetClientProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const isCreated = searchParams.get('created') === 'true';
 
   const [snippet, setSnippet] = useState<SnippetData>(initialData);
@@ -37,6 +39,8 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
+  const [showLineNumbers, setShowLineNumbers] = useState(true);
 
   // Dynamic import of highlight.js
   const highlightCode = useCallback(async (content: string, language: string) => {
@@ -164,6 +168,91 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
     ? `${window.location.origin}/${snippet.id}`
     : '';
 
+  const downloadAsFile = () => {
+    if (!snippet.content) return;
+    const extMap: Record<string, string> = {
+      javascript: '.js', typescript: '.ts', python: '.py', java: '.java',
+      c: '.c', cpp: '.cpp', csharp: '.cs', go: '.go', rust: '.rs',
+      ruby: '.rb', php: '.php', swift: '.swift', kotlin: '.kt', scala: '.scala',
+      html: '.html', css: '.css', scss: '.scss', json: '.json', yaml: '.yaml',
+      xml: '.xml', markdown: '.md', sql: '.sql', bash: '.sh',
+      powershell: '.ps1', dockerfile: '', plaintext: '.txt',
+    };
+    const ext = extMap[snippet.language] ?? '.txt';
+    const filename = (snippet.title || `snippet-${snippet.id}`) + ext;
+    const blob = new Blob([snippet.content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const forkSnippet = () => {
+    if (!snippet.content) return;
+    const params = new URLSearchParams();
+    params.set('fork', snippet.id);
+    params.set('lang', snippet.language);
+    if (snippet.title) params.set('title', snippet.title);
+    // Store content in sessionStorage for fork (URL length limits)
+    sessionStorage.setItem('snipit-fork-content', snippet.content);
+    router.push(`/?${params.toString()}`);
+  };
+
+  // Render line numbers alongside code
+  const renderWithLineNumbers = (html: string, raw: boolean) => {
+    const content = snippet.content || '';
+    const lines = content.split('\n');
+    const lineCount = lines.length;
+
+    if (!showLineNumbers || lineCount === 0) {
+      if (raw) {
+        return (
+          <pre className="p-4 text-slate-900 dark:text-white font-mono text-sm whitespace-pre-wrap break-words">
+            {content}
+          </pre>
+        );
+      }
+      return (
+        <pre className="p-4">
+          <code
+            className={`hljs language-${snippet.language}`}
+            dangerouslySetInnerHTML={{ __html: html || content }}
+          />
+        </pre>
+      );
+    }
+
+    return (
+      <div className="flex">
+        <div className="select-none text-right pr-4 pl-4 py-4 text-slate-400 dark:text-slate-600 font-mono text-sm border-r border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/30 shrink-0"
+          aria-hidden="true"
+        >
+          {lines.map((_, i) => (
+            <div key={i} className="leading-relaxed">{i + 1}</div>
+          ))}
+        </div>
+        <div className="flex-1 overflow-auto">
+          {raw ? (
+            <pre className="p-4 text-slate-900 dark:text-white font-mono text-sm whitespace-pre leading-relaxed">
+              {content}
+            </pre>
+          ) : (
+            <pre className="p-4 leading-relaxed">
+              <code
+                className={`hljs language-${snippet.language}`}
+                dangerouslySetInnerHTML={{ __html: html || content }}
+              />
+            </pre>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // Password protected view
   if (snippet.requiresPassword) {
     return (
@@ -225,13 +314,13 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
             </span>
           </Link>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap justify-end">
             <ThemeToggle />
             {/* Hide QR and Copy URL for burn-after-read snippets (already consumed) */}
             {!snippet.burnAfterRead && (
               <button
                 onClick={() => setShowQR(!showQR)}
-                className="px-4 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition"
+                className="px-3 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition text-sm"
                 title="Show QR Code"
               >
                 📱 QR
@@ -239,14 +328,50 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
             )}
             <button
               onClick={() => setShowRaw(!showRaw)}
-              className="px-4 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition"
+              className="px-3 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition text-sm"
             >
               {showRaw ? '🎨 Highlight' : '📄 Raw'}
             </button>
+            <button
+              onClick={() => setShowLineNumbers(!showLineNumbers)}
+              className={`px-3 py-2 border rounded-lg transition text-sm ${
+                showLineNumbers
+                  ? 'bg-purple-100 dark:bg-purple-500/20 border-purple-300 dark:border-purple-500/50 text-purple-700 dark:text-purple-300'
+                  : 'bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+              }`}
+              title="Toggle line numbers"
+            >
+              #
+            </button>
+            {!snippet.burnAfterRead && snippet.content && (
+              <>
+                <button
+                  onClick={downloadAsFile}
+                  className="px-3 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition text-sm"
+                  title="Download as file"
+                >
+                  ⬇️ Download
+                </button>
+                <button
+                  onClick={forkSnippet}
+                  className="px-3 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition text-sm"
+                  title="Fork this snippet"
+                >
+                  🍴 Fork
+                </button>
+                <button
+                  onClick={() => setShowEmbed(true)}
+                  className="px-3 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition text-sm"
+                  title="Embed this snippet"
+                >
+                  &lt;/&gt; Embed
+                </button>
+              </>
+            )}
             {!snippet.burnAfterRead && (
               <button
                 onClick={() => copyToClipboard(shareUrl, setCopiedUrl)}
-                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition"
+                className="px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition text-sm"
               >
                 {copiedUrl ? '✓ Copied!' : '🔗 Copy URL'}
               </button>
@@ -268,6 +393,13 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
         {!snippet.burnAfterRead && (
           <QRCodeModal url={shareUrl} show={showQR} onClose={() => setShowQR(false)} />
         )}
+
+        {/* Embed Modal */}
+        <EmbedModal
+          snippetId={snippet.id}
+          show={showEmbed}
+          onClose={() => setShowEmbed(false)}
+        />
 
         {/* Snippet Info */}
         <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 mb-6 shadow-sm dark:shadow-none">
@@ -342,18 +474,7 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
             </button>
           </div>
           <div className="overflow-auto max-h-[70vh]">
-            {showRaw ? (
-              <pre className="p-4 text-slate-900 dark:text-white font-mono text-sm whitespace-pre-wrap break-words">
-                {snippet.content}
-              </pre>
-            ) : (
-              <pre className="p-4">
-                <code
-                  className={`hljs language-${snippet.language}`}
-                  dangerouslySetInnerHTML={{ __html: highlightedHtml || snippet.content || '' }}
-                />
-              </pre>
-            )}
+            {renderWithLineNumbers(highlightedHtml, showRaw)}
           </div>
         </div>}
 
