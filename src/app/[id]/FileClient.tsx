@@ -17,6 +17,7 @@ interface FileData {
   expiresAt: number | null;
   burnAfterRead: boolean;
   requiresPassword: boolean;
+  creatorView?: boolean;
 }
 
 interface FileClientProps {
@@ -347,15 +348,29 @@ export default function FileClient({ initialData }: FileClientProps) {
           </div>
         </div>
 
+        {/* Creator View — burn-after-read: show share panel only */}
+        {fileData.creatorView && (
+          <div className="mb-6 p-6 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 rounded-xl text-center">
+            <div className="text-3xl mb-3">🔥</div>
+            <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-300 mb-2">Burn After Reading Enabled</h3>
+            <p className="text-amber-700 dark:text-amber-400 text-sm mb-1">
+              File download is hidden to protect the one-time access.
+            </p>
+            <p className="text-amber-600 dark:text-amber-500 text-sm">
+              Share the link above — the recipient can download the file once, then it will be permanently deleted.
+            </p>
+          </div>
+        )}
+
         {/* Burn Warning */}
-        {fileData.burnAfterRead && (
+        {fileData.burnAfterRead && !fileData.creatorView && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">
             ⚠️ This file will be deleted after downloading. Make sure to save it!
           </div>
         )}
 
-        {/* Download Button */}
-        <div className="mb-6">
+        {/* Download Button — hidden for creator view */}
+        {!fileData.creatorView && <div className="mb-6">
           <button
             onClick={() => downloadFile(password || undefined)}
             disabled={downloading}
@@ -369,7 +384,7 @@ export default function FileClient({ initialData }: FileClientProps) {
               </>
             )}
           </button>
-        </div>
+        </div>}
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">

@@ -17,6 +17,7 @@ interface SnippetData {
   expiresAt: number | null;
   burnAfterRead: boolean;
   requiresPassword?: boolean;
+  creatorView?: boolean;
 }
 
 interface SnippetClientProps {
@@ -295,14 +296,28 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
         </div>
 
         {/* Burn After Read Warning */}
-        {snippet.burnAfterRead && (
+        {snippet.burnAfterRead && !snippet.creatorView && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">
             ⚠️ This snippet has been deleted and cannot be viewed again. Copy the content now if you need it!
           </div>
         )}
 
-        {/* Content */}
-        <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+        {/* Creator View — burn-after-read: show share panel only, no content */}
+        {snippet.creatorView && (
+          <div className="mb-6 p-6 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 rounded-xl text-center">
+            <div className="text-3xl mb-3">🔥</div>
+            <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-300 mb-2">Burn After Reading Enabled</h3>
+            <p className="text-amber-700 dark:text-amber-400 text-sm mb-1">
+              Content is hidden to protect the one-time view.
+            </p>
+            <p className="text-amber-600 dark:text-amber-500 text-sm">
+              Share the link above — the recipient will see the content once, then it will be permanently deleted.
+            </p>
+          </div>
+        )}
+
+        {/* Content — hidden for creator view of burn-after-read */}
+        {!snippet.creatorView && <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
           <div className="flex items-center justify-between px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700/50">
             <div className="flex items-center gap-4">
               <span className="text-slate-500 dark:text-slate-400 text-sm">
@@ -333,7 +348,7 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
               </pre>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Footer */}
         <div className="mt-8 text-center">

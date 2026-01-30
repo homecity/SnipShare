@@ -9,6 +9,7 @@ import { decryptWithKey, base64ToArrayBuffer } from '@/lib/encryption';
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -76,8 +77,10 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export default async function SnippetPage({ params }: PageProps) {
+export default async function SnippetPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const isCreated = resolvedSearchParams?.created === 'true';
 
   let db;
   try {
@@ -94,6 +97,9 @@ export default async function SnippetPage({ params }: PageProps) {
 
   // File type snippet
   if (snippet.type === 'file') {
+    // Skip burn if creator just created it
+    const fileCreatorView = isCreated && snippet.burn_after_read;
+
     if (snippet.is_encrypted) {
       return (
         <FileClient
@@ -107,6 +113,7 @@ export default async function SnippetPage({ params }: PageProps) {
             expiresAt: snippet.expires_at,
             burnAfterRead: snippet.burn_after_read,
             requiresPassword: true,
+            creatorView: fileCreatorView,
           }}
         />
       );
@@ -124,6 +131,7 @@ export default async function SnippetPage({ params }: PageProps) {
           expiresAt: snippet.expires_at,
           burnAfterRead: snippet.burn_after_read,
           requiresPassword: false,
+          creatorView: fileCreatorView,
         }}
       />
     );
@@ -131,6 +139,27 @@ export default async function SnippetPage({ params }: PageProps) {
 
   // Text type snippet (existing logic)
   if (!snippet.is_encrypted) {
+    // Skip view count and burn if creator just created it
+    if (isCreated && snippet.burn_after_read) {
+      // Creator view — don't burn, don't show content, just show share panel
+      return (
+        <SnippetClient
+          initialData={{
+            id: snippet.id,
+            content: '',
+            language: snippet.language,
+            title: snippet.title,
+            viewCount: snippet.view_count,
+            createdAt: snippet.created_at,
+            expiresAt: snippet.expires_at,
+            burnAfterRead: snippet.burn_after_read,
+            requiresPassword: false,
+            creatorView: true,
+          }}
+        />
+      );
+    }
+
     await incrementViewCount(db, id);
 
     if (snippet.burn_after_read) {
