@@ -83,8 +83,10 @@ export async function GET(
       }
 
       await incrementViewCount(db, id);
+      const pwNewViewCount = snippet.view_count + 1;
 
-      if (snippet.burn_after_read) {
+      // Burn after read: allow 2 views (creator + recipient), then delete
+      if (snippet.burn_after_read && pwNewViewCount >= 2) {
         await markAsDeleted(db, id);
         await r2.delete(snippet.r2_key!);
       }
@@ -115,8 +117,10 @@ export async function GET(
     }
 
     await incrementViewCount(db, id);
+    const newViewCount = snippet.view_count + 1;
 
-    if (snippet.burn_after_read) {
+    // Burn after read: allow 2 views (creator + recipient), then delete
+    if (snippet.burn_after_read && newViewCount >= 2) {
       await markAsDeleted(db, id);
       await r2.delete(snippet.r2_key!);
     }

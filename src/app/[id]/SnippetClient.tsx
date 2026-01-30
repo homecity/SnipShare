@@ -295,8 +295,8 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
           </div>
         </div>
 
-        {/* Burn After Read Warning */}
-        {snippet.burnAfterRead && !snippet.creatorView && (
+        {/* Burn After Read Warning — shown when snippet will be burned after this view */}
+        {snippet.burnAfterRead && !snippet.creatorView && snippet.viewCount >= 2 && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-300">
             ⚠️ This snippet has been deleted and cannot be viewed again. Copy the content now if you need it!
           </div>
