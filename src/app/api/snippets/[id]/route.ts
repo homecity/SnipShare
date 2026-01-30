@@ -41,9 +41,10 @@ export async function GET(
 
     // Increment view count
     await incrementViewCount(db, id);
+    const newViewCount = snippet.view_count + 1;
 
-    // Handle burn after read
-    if (snippet.burn_after_read) {
+    // Burn after read: allow 2 views (creator + recipient), then delete
+    if (snippet.burn_after_read && newViewCount >= 2) {
       await markAsDeleted(db, id);
     }
 
@@ -68,7 +69,7 @@ export async function GET(
       content,
       language: snippet.language,
       title: snippet.title,
-      viewCount: snippet.view_count + 1,
+      viewCount: newViewCount,
       createdAt: snippet.created_at,
       expiresAt: snippet.expires_at,
       burnAfterRead: snippet.burn_after_read,
@@ -145,9 +146,10 @@ export async function POST(
 
     // Increment view count
     await incrementViewCount(db, id);
+    const newViewCount = snippet.view_count + 1;
 
-    // Handle burn after read
-    if (snippet.burn_after_read) {
+    // Burn after read: allow 2 views (creator + recipient), then delete
+    if (snippet.burn_after_read && newViewCount >= 2) {
       await markAsDeleted(db, id);
     }
 
@@ -156,7 +158,7 @@ export async function POST(
       content: finalContent,
       language: snippet.language,
       title: snippet.title,
-      viewCount: snippet.view_count + 1,
+      viewCount: newViewCount,
       createdAt: snippet.created_at,
       expiresAt: snippet.expires_at,
       burnAfterRead: snippet.burn_after_read,

@@ -38,9 +38,10 @@ export async function GET(
 
     // Increment view count
     await incrementViewCount(db, id);
+    const newViewCount = snippet.view_count + 1;
 
-    // Handle burn after read
-    if (snippet.burn_after_read) {
+    // Burn after read: allow 2 views (creator + recipient), then delete
+    if (snippet.burn_after_read && newViewCount >= 2) {
       await markAsDeleted(db, id);
     }
 
@@ -53,7 +54,7 @@ export async function GET(
         'Content-Type': contentType,
         'X-Snippet-Language': snippet.language,
         'X-Snippet-Title': snippet.title || 'Untitled',
-        'X-Snippet-Views': String(snippet.view_count + 1),
+        'X-Snippet-Views': String(newViewCount),
         'Cache-Control': snippet.burn_after_read
           ? 'no-store'
           : 'public, max-age=60',

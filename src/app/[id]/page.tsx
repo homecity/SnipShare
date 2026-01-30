@@ -139,30 +139,13 @@ export default async function SnippetPage({ params, searchParams }: PageProps) {
 
   // Text type snippet (existing logic)
   if (!snippet.is_encrypted) {
-    // Skip view count and burn if creator just created it
-    if (isCreated && snippet.burn_after_read) {
-      // Creator view — don't burn, don't show content, just show share panel
-      return (
-        <SnippetClient
-          initialData={{
-            id: snippet.id,
-            content: '',
-            language: snippet.language,
-            title: snippet.title,
-            viewCount: snippet.view_count,
-            createdAt: snippet.created_at,
-            expiresAt: snippet.expires_at,
-            burnAfterRead: snippet.burn_after_read,
-            requiresPassword: false,
-            creatorView: true,
-          }}
-        />
-      );
-    }
-
     await incrementViewCount(db, id);
+    const newViewCount = snippet.view_count + 1;
 
-    if (snippet.burn_after_read) {
+    // Burn after read: allow 2 views (creator + recipient), then delete
+    // View 1 (creator): show content, don't burn
+    // View 2 (recipient): show content, then burn (mark deleted for future access)
+    if (snippet.burn_after_read && newViewCount >= 2) {
       await markAsDeleted(db, id);
     }
 
