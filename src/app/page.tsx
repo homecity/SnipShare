@@ -4,6 +4,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_ALLOWED_EXTENSIONS as SHARED_ALLOWED_EXTENSIONS } from '@/lib/constants';
 import ThemeToggle from '@/components/ThemeToggle';
+import SharePanel from '@/components/SharePanel';
+import QRCodeModal from '@/components/QRCodeModal';
 
 const LANGUAGES = [
   'plaintext', 'javascript', 'typescript', 'python', 'java', 'c', 'cpp', 'csharp',
@@ -72,6 +74,15 @@ export default function Home() {
   const [burnAfterRead, setBurnAfterRead] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Created snippet state (shown after creation instead of navigating away)
+  const [createdSnippet, setCreatedSnippet] = useState<{
+    id: string;
+    title?: string;
+    type: 'text' | 'file';
+    burnAfterRead: boolean;
+  } | null>(null);
+  const [showQR, setShowQR] = useState(false);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -161,7 +172,18 @@ export default function Home() {
         throw new Error(data.error || 'Failed to create snippet');
       }
 
-      router.push(`/${data.id}?created=true`);
+      if (burnAfterRead) {
+        // For burn-after-read: show success panel in-page (don't navigate to /{id} which would trigger burn)
+        setCreatedSnippet({
+          id: data.id!,
+          title: title || undefined,
+          type: 'text',
+          burnAfterRead: true,
+        });
+      } else {
+        // For normal snippets: navigate to the snippet page
+        router.push(`/${data.id}?created=true`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -217,7 +239,17 @@ export default function Home() {
       });
 
       if (data.id) {
-        router.push(`/${data.id}?created=true`);
+        if (burnAfterRead) {
+          // For burn-after-read: show success panel in-page
+          setCreatedSnippet({
+            id: data.id,
+            title: file.name,
+            type: 'file',
+            burnAfterRead: true,
+          });
+        } else {
+          router.push(`/${data.id}?created=true`);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -242,17 +274,53 @@ export default function Home() {
           <p className="text-slate-500 dark:text-slate-400">Share text, code, and files securely</p>
         </header>
 
-        {/* Security Banner */}
-        <div className="mb-6 px-4 py-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/20 rounded-lg flex items-center gap-3">
-          <span className="text-xl shrink-0">🛡️</span>
-          <p className="text-emerald-700 dark:text-emerald-300 text-sm">
-            <span className="font-semibold">Encrypted at rest.</span>{' '}
-            All snippets and files are securely encrypted before storage — even administrators cannot access your data.
-          </p>
-        </div>
+        {/* Created Snippet Success Panel */}
+        {createdSnippet && (
+          <>
+            <SharePanel
+              url={`${typeof window !== 'undefined' ? window.location.origin : ''}/${createdSnippet.id}`}
+              burnAfterRead={createdSnippet.burnAfterRead}
+              onShowQR={() => setShowQR(true)}
+              type={createdSnippet.type === 'file' ? 'file' : 'snippet'}
+            />
+            <QRCodeModal
+              url={`${typeof window !== 'undefined' ? window.location.origin : ''}/${createdSnippet.id}`}
+              show={showQR}
+              onClose={() => setShowQR(false)}
+            />
+            <div className="mb-6 text-center">
+              <button
+                onClick={() => {
+                  setCreatedSnippet(null);
+                  setContent('');
+                  setTitle('');
+                  setFile(null);
+                  setPassword('');
+                  setBurnAfterRead(false);
+                  setError('');
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg shadow-lg shadow-purple-500/25 transition"
+              >
+                Create another
+              </button>
+            </div>
+          </>
+        )}
 
-        {/* Tabs */}
-        <div className="flex justify-center mb-6">
+        {/* Security Banner */}
+        {!createdSnippet && (
+          <div className="mb-6 px-4 py-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/20 rounded-lg flex items-center gap-3">
+            <span className="text-xl shrink-0">🛡️</span>
+            <p className="text-emerald-700 dark:text-emerald-300 text-sm">
+              <span className="font-semibold">Encrypted at rest.</span>{' '}
+              All snippets and files are securely encrypted before storage — even administrators cannot access your data.
+            </p>
+          </div>
+        )}
+
+        {/* Tabs — hidden when showing created snippet */}
+        {!createdSnippet && <div className="flex justify-center mb-6">
           <div className="inline-flex bg-slate-200/80 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg p-1">
             <button
               onClick={() => { setTab('text'); setError(''); }}
@@ -275,10 +343,10 @@ export default function Home() {
               📁 File
             </button>
           </div>
-        </div>
+        </div>}
 
         {/* Text Tab */}
-        {tab === 'text' && (
+        {!createdSnippet && tab === 'text' && (
           <form onSubmit={handleTextSubmit} className="space-y-6">
             <div>
               <input
@@ -371,7 +439,7 @@ export default function Home() {
         )}
 
         {/* File Tab */}
-        {tab === 'file' && (
+        {!createdSnippet && tab === 'file' && (
           <form onSubmit={handleFileSubmit} className="space-y-6">
             {/* Drop Zone */}
             <div
