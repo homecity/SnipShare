@@ -227,30 +227,35 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
 
           <div className="flex gap-2">
             <ThemeToggle />
-            <button
-              onClick={() => setShowQR(!showQR)}
-              className="px-4 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition"
-              title="Show QR Code"
-            >
-              📱 QR
-            </button>
+            {/* Hide QR and Copy URL for burn-after-read snippets (already consumed) */}
+            {!snippet.burnAfterRead && (
+              <button
+                onClick={() => setShowQR(!showQR)}
+                className="px-4 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition"
+                title="Show QR Code"
+              >
+                📱 QR
+              </button>
+            )}
             <button
               onClick={() => setShowRaw(!showRaw)}
               className="px-4 py-2 bg-white dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition"
             >
               {showRaw ? '🎨 Highlight' : '📄 Raw'}
             </button>
-            <button
-              onClick={() => copyToClipboard(shareUrl, setCopiedUrl)}
-              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition"
-            >
-              {copiedUrl ? '✓ Copied!' : '🔗 Copy URL'}
-            </button>
+            {!snippet.burnAfterRead && (
+              <button
+                onClick={() => copyToClipboard(shareUrl, setCopiedUrl)}
+                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition"
+              >
+                {copiedUrl ? '✓ Copied!' : '🔗 Copy URL'}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Share Panel (shown after creation) */}
-        {isCreated && (
+        {/* Share Panel (shown after creation, but not for burn-after-read) */}
+        {isCreated && !snippet.burnAfterRead && (
           <SharePanel
             url={shareUrl}
             burnAfterRead={snippet.burnAfterRead}
@@ -260,7 +265,9 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
         )}
 
         {/* QR Code Modal */}
-        <QRCodeModal url={shareUrl} show={showQR} onClose={() => setShowQR(false)} />
+        {!snippet.burnAfterRead && (
+          <QRCodeModal url={shareUrl} show={showQR} onClose={() => setShowQR(false)} />
+        )}
 
         {/* Snippet Info */}
         <div className="bg-white/80 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 mb-6 shadow-sm dark:shadow-none">
