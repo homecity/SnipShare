@@ -628,6 +628,10 @@ export default function Home() {
         <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm space-y-2">
           <p>No login required. Your snippets are yours.</p>
           <p>
+            <a href="/diff" className="text-purple-500 dark:text-purple-400 hover:underline">
+              🔀 Diff Tool
+            </a>
+            {' · '}
             <a href="/docs" className="text-purple-500 dark:text-purple-400 hover:underline">
               API Documentation
             </a>
