@@ -625,8 +625,17 @@ export default function Home() {
           </div>
         </div>
 
-        <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm">
+        <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm space-y-2">
           <p>No login required. Your snippets are yours.</p>
+          <p>
+            <a href="/docs" className="text-purple-500 dark:text-purple-400 hover:underline">
+              API Documentation
+            </a>
+            {' · '}
+            <a href="https://github.com/homecity/SnipShare" target="_blank" rel="noopener noreferrer" className="text-purple-500 dark:text-purple-400 hover:underline">
+              GitHub
+            </a>
+          </p>
         </footer>
       </div>
     </div>
