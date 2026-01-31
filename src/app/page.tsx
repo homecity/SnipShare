@@ -62,6 +62,26 @@ export default function Home() {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('plaintext');
 
+  // Fork support: pre-fill from sessionStorage when ?fork= param is present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const forkId = params.get('fork');
+    if (forkId) {
+      const forkContent = sessionStorage.getItem('snipit-fork-content');
+      if (forkContent) {
+        setContent(forkContent);
+        sessionStorage.removeItem('snipit-fork-content');
+        setTab('text');
+      }
+      const lang = params.get('lang');
+      if (lang) setLanguage(lang);
+      const forkTitle = params.get('title');
+      if (forkTitle) setTitle(`Fork of ${forkTitle}`);
+      // Clean URL without reload
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
+
   // File state
   const [file, setFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -361,12 +381,26 @@ export default function Home() {
 
             <div>
               <textarea
-                placeholder="Paste your text or code here..."
+                placeholder="Paste your text or code here... (Ctrl+Enter to submit)"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (content.trim() && !isSubmitting) {
+                      handleTextSubmit(e as unknown as React.FormEvent);
+                    }
+                  }
+                }}
                 className="w-full h-64 px-4 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition font-mono text-sm resize-y"
                 required
               />
+              {content && (
+                <div className="flex justify-end gap-4 mt-1 text-xs text-slate-400 dark:text-slate-500">
+                  <span>{content.split('\n').length} lines</span>
+                  <span>{content.length} chars</span>
+                </div>
+              )}
             </div>
 
             {/* Options Grid */}
@@ -591,12 +625,21 @@ export default function Home() {
           </div>
         </div>
 
-        <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm space-y-3">
+        <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm space-y-2">
           <p>No login required. Your snippets are yours.</p>
-          <div className="flex justify-center gap-4">
-            <a href="/diff" className="hover:text-purple-500 transition">🔀 Diff Tool</a>
-            <a href="https://github.com/homecity/SnipShare" target="_blank" rel="noopener noreferrer" className="hover:text-purple-500 transition">GitHub</a>
-          </div>
+          <p>
+            <a href="/diff" className="text-purple-500 dark:text-purple-400 hover:underline">
+              🔀 Diff Tool
+            </a>
+            {' · '}
+            <a href="/docs" className="text-purple-500 dark:text-purple-400 hover:underline">
+              API Documentation
+            </a>
+            {' · '}
+            <a href="https://github.com/homecity/SnipShare" target="_blank" rel="noopener noreferrer" className="text-purple-500 dark:text-purple-400 hover:underline">
+              GitHub
+            </a>
+          </p>
         </footer>
       </div>
     </div>
