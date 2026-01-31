@@ -6,6 +6,7 @@ import Link from 'next/link';
 import QRCodeModal from '@/components/QRCodeModal';
 import SharePanel from '@/components/SharePanel';
 import ThemeToggle from '@/components/ThemeToggle';
+import SyntaxThemeSelector, { getStoredTheme, applySyntaxTheme } from '@/components/SyntaxThemeSelector';
 
 interface SnippetData {
   id: string;
@@ -91,16 +92,19 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
   useEffect(() => {
     if (snippet.content && !showRaw) {
       highlightCode(snippet.content, snippet.language).then(setHighlightedHtml);
-      // Load CSS dynamically
+      // Load syntax theme from user preference
       if (!document.querySelector('link[data-hljs-theme]')) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css';
-        link.setAttribute('data-hljs-theme', 'true');
-        document.head.appendChild(link);
+        applySyntaxTheme(getStoredTheme());
       }
     }
   }, [snippet.content, snippet.language, showRaw, highlightCode]);
+
+  const handleThemeChange = () => {
+    // Re-highlight with the new theme (CSS swap is handled by the component)
+    if (snippet.content && !showRaw) {
+      highlightCode(snippet.content, snippet.language).then(setHighlightedHtml);
+    }
+  };
 
   const unlockSnippet = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,8 +229,9 @@ export default function SnippetClient({ initialData }: SnippetClientProps) {
             </span>
           </Link>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <ThemeToggle />
+            {!showRaw && <SyntaxThemeSelector onChange={handleThemeChange} />}
             {/* Hide QR and Copy URL for burn-after-read snippets (already consumed) */}
             {!snippet.burnAfterRead && (
               <button

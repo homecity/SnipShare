@@ -591,8 +591,12 @@ export default function Home() {
           </div>
         </div>
 
-        <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm">
+        <footer className="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm space-y-3">
           <p>No login required. Your snippets are yours.</p>
+          <div className="flex justify-center gap-4">
+            <a href="/diff" className="hover:text-purple-500 transition">🔀 Diff Tool</a>
+            <a href="https://github.com/homecity/SnipShare" target="_blank" rel="noopener noreferrer" className="hover:text-purple-500 transition">GitHub</a>
+          </div>
         </footer>
       </div>
     </div>
