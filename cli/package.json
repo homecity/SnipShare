@@ -1,0 +1,14 @@
+{
+  "name": "snipshare-cli",
+  "version": "1.0.0",
+  "description": "CLI tool for SnipShare — share code snippets from your terminal",
+  "type": "module",
+  "bin": {
+    "snip": "./bin/snip.js"
+  },
+  "keywords": ["snippet", "pastebin", "share", "cli", "code"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSnippetById, incrementViewCount, markAsDeleted } from '@/lib/db';
+import { decryptWithKey, base64ToArrayBuffer } from '@/lib/encryption';
 import { getD1Db } from '@/lib/d1';
 
 /**
@@ -45,10 +46,26 @@ export async function GET(
       await markAsDeleted(db, id);
     }
 
+    // Decrypt server-side encryption if encryption_key exists
+    let content = snippet.content;
+    if (snippet.encryption_key) {
+      try {
+        const encryptedBuffer = base64ToArrayBuffer(content);
+        const decryptedBuffer = await decryptWithKey(encryptedBuffer, snippet.encryption_key);
+        content = new TextDecoder().decode(decryptedBuffer);
+      } catch (e) {
+        console.error('Failed to decrypt content with encryption key:', e);
+        return new NextResponse('Failed to decrypt content.\n', {
+          status: 500,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
+      }
+    }
+
     // Return raw content with appropriate headers
     const contentType = getContentType(snippet.language);
 
-    return new NextResponse(snippet.content, {
+    return new NextResponse(content, {
       status: 200,
       headers: {
         'Content-Type': contentType,
